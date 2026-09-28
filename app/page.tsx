@@ -1,68 +1,36 @@
-import Link from 'next/link'
-import { Sparkles, MessageSquare, HardDrive, ShieldCheck, FileText } from 'lucide-react'
-import { RetroTaskbar } from '@/components/shell/retro-taskbar'
-import { RetroButton, RetroNotification, RetroWindow } from '@/components/retro'
-import { DesktopIcons } from '@/components/home/desktop-icons'
-import { HeroWindow } from '@/components/home/hero-window'
-import { RecentItemsWindow } from '@/components/home/recent-items-window'
-import { SecurityWindow } from '@/components/home/security-window'
+'use client'
+
+import { ModernNavbar } from '@/components/modern/navbar'
+import { ModernHeroSection } from '@/components/modern/hero-section'
+import { ModernItemShowcase } from '@/components/modern/item-showcase'
+import { ModernHowItWorks } from '@/components/modern/how-it-works'
+import { ModernRecentReunions } from '@/components/modern/recent-reunions'
+import { ModernFAQSection } from '@/components/modern/faq-section'
+import { ModernFooter } from '@/components/modern/footer'
 
 export default function HomePage() {
   return (
-    <div className="min-h-dvh bg-win-desktop">
-      <div className="mx-auto flex max-w-7xl gap-4 px-3 pb-16 pt-3">
-        {/* Desktop Icons Column */}
-        <div className="hidden shrink-0 sm:block">
-          <DesktopIcons />
-        </div>
+    <div className="min-h-screen bg-[#090a0f] text-zinc-100 selection:bg-indigo-500/30 selection:text-indigo-200">
+      {/* Floating Modern Capsule Navbar */}
+      <ModernNavbar />
 
-        {/* Desktop Main Workspace Area */}
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <HeroWindow />
-          <RecentItemsWindow />
-          <SecurityWindow />
+      {/* Hero Section with Live Stats Bento Grid */}
+      <ModernHeroSection />
 
-          {/* Desktop Footer Info */}
-          <footer className="bevel-out bg-win-face flex flex-wrap items-center justify-between gap-2 p-2 text-[11px] text-win-text">
-            <span>
-              <strong>LOST//98 v1.0</strong> — Designed for campus &amp; community lost property recovery.
-            </span>
-            <div className="flex gap-3">
-              <Link href="/login" className="text-win-title font-bold underline">
-                Log In to Domain
-              </Link>
-              <Link href="/register" className="text-win-title font-bold underline">
-                New User Registration
-              </Link>
-              <Link href="/security" className="text-win-green font-bold underline">
-                Security Center
-              </Link>
-            </div>
-          </footer>
-        </div>
-      </div>
+      {/* Live Item Showcase with Filters & In-Page Modal */}
+      <ModernItemShowcase />
 
-      {/* Floating Notification Widget */}
-      <div className="fixed right-3 top-3 z-40 hidden lg:block">
-        <RetroNotification
-          title="POSSIBLE MATCH FOUND"
-          icon={<Sparkles className="h-3.5 w-3.5 text-win-title" aria-hidden />}
-          action={
-            <Link href="/search/L98-2048">
-              <RetroButton variant="primary" className="w-full gap-2 text-[12px]">
-                <MessageSquare className="h-3.5 w-3.5" aria-hidden />
-                Review Match
-              </RetroButton>
-            </Link>
-          }
-        >
-          A found item may match your lost report{' '}
-          <span className="font-bold">#L98-2049</span>. Match confidence:{' '}
-          <strong className="text-win-title">87%</strong>.
-        </RetroNotification>
-      </div>
+      {/* Numbered Services / Workflow Section (01, 02, 03) */}
+      <ModernHowItWorks />
 
-      <RetroTaskbar />
+      {/* Verified Campus Reunions Trust Strip */}
+      <ModernRecentReunions />
+
+      {/* Framer-Style FAQs Accordion */}
+      <ModernFAQSection />
+
+      {/* Modern High-Impact Footer */}
+      <ModernFooter />
     </div>
   )
 }

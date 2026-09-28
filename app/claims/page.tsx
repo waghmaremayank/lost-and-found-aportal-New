@@ -15,20 +15,9 @@ import {
   AlertTriangle,
   ArrowRight,
   Send,
+  Lock,
 } from 'lucide-react'
-import { DesktopShell } from '@/components/shell/desktop-shell'
-import {
-  RetroWindow,
-  RetroButton,
-  RetroBadge,
-  RetroGroupBox,
-  RetroStatusBar,
-  RetroTabs,
-  RetroInput,
-  RetroTextarea,
-  RetroField,
-  RetroDialog,
-} from '@/components/retro'
+import { ModernShell } from '@/components/shell/modern-shell'
 
 type Claim = {
   id: string
@@ -47,7 +36,7 @@ const INITIAL_CLAIMS: Claim[] = [
   {
     id: 'CLM-101',
     reportId: 'L98-2048',
-    itemTitle: 'Black Backpack',
+    itemTitle: 'Black Backpack (Herschel)',
     type: 'OUTGOING',
     claimant: 'U-2048 (You)',
     finder: 'U-1180',
@@ -68,7 +57,7 @@ const INITIAL_CLAIMS: Claim[] = [
   {
     id: 'CLM-102',
     reportId: 'L98-2054',
-    itemTitle: 'Gold Ring',
+    itemTitle: '14K Gold Band Ring',
     type: 'INCOMING',
     claimant: 'U-7788',
     finder: 'U-2048 (You)',
@@ -81,7 +70,7 @@ const INITIAL_CLAIMS: Claim[] = [
       },
       {
         question: 'Approximate ring size or specific karat hallmark?',
-        answer: '14K gold hallmark near the date.',
+        answer: '14K gold hallmark stamped near the date.',
       },
     ],
     safeLocation: 'Sports Complex Front Desk',
@@ -107,7 +96,7 @@ export default function ClaimsCenterPage() {
     if (selectedClaim && selectedClaim.id === claimId) {
       setSelectedClaim({ ...selectedClaim, status: 'VERIFIED' })
     }
-    setToast(`Claim ${claimId} approved! Ownership verified.`)
+    setToast(`Claim ${claimId} approved! Ownership verified. Handover unlocked.`)
     setTimeout(() => setToast(null), 4000)
   }
 
@@ -123,207 +112,223 @@ export default function ClaimsCenterPage() {
   }
 
   return (
-    <DesktopShell activeKey="claims">
-      <div className="flex flex-col gap-3">
-        {/* Toast */}
+    <ModernShell
+      activeKey="claims"
+      title="Ownership Verification & Claims Hub"
+      subtitle="Inspect ownership proof challenges, validate secret answers, and schedule safe pickup at campus security desks."
+      badge="ZERO-FRAUD GATEWAY"
+    >
+      <div className="flex flex-col gap-6">
+        {/* Toast Notification */}
         {toast && (
-          <div className="bevel-out bg-win-yellow flex items-center justify-between p-2.5 text-[13px] font-bold text-win-text">
+          <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center justify-between backdrop-blur-xl animate-in fade-in">
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-win-green" aria-hidden />
+              <CheckCircle2 className="h-4 w-4" />
               {toast}
             </span>
             <button
               type="button"
               onClick={() => setToast(null)}
-              className="text-[11px] font-bold text-win-shadow hover:text-win-dark"
+              className="text-zinc-400 hover:text-white"
             >
               ✕
             </button>
           </div>
         )}
 
-        <div className="grid gap-3 lg:grid-cols-[1.1fr_1.3fr]">
-          {/* Claims List Explorer */}
-          <RetroWindow
-            title="Ownership Claims & Verification Station"
-            icon={<CheckSquare className="h-3.5 w-3.5" aria-hidden />}
-            controls={['minimize', 'maximize', 'close']}
-          >
-            <div className="flex flex-col gap-3">
-              <RetroTabs
-                tabs={[
-                  { key: 'all', label: `All Claims (${claims.length})` },
-                  {
-                    key: 'outgoing',
-                    label: `Claims I Filed (${claims.filter((c) => c.type === 'OUTGOING').length})`,
-                  },
-                  {
-                    key: 'incoming',
-                    label: `Claims to Review (${claims.filter((c) => c.type === 'INCOMING').length})`,
-                  },
-                ]}
-                active={tab}
-                onChange={(k) => setTab(k as 'all' | 'outgoing' | 'incoming')}
-              />
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_1.3fr]">
+          {/* Claims List Column */}
+          <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+                <ShieldCheck className="h-4 w-4 text-indigo-400" />
+                <span className="font-bold text-white">CLAIMS QUEUE</span>
+              </div>
+              <span className="text-xs text-zinc-500 font-mono">{claims.length} ACTIVE</span>
+            </div>
 
-              <div className="flex flex-col gap-2">
-                {filteredClaims.map((c) => {
-                  const isSelected = selectedClaim?.id === c.id
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setSelectedClaim(c)}
-                      className={`flex flex-col gap-1 p-2 text-left transition-colors dotted-focus ${
-                        isSelected ? 'bevel-in bg-win-white' : 'bevel-out bg-win-face hover:bg-win-face-light'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="font-mono-sys text-[12px] font-bold text-win-title">
-                          #{c.id} — {c.itemTitle}
-                        </span>
-                        <ClaimStatusBadge status={c.status} />
-                      </div>
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-1 p-1 rounded-2xl bg-[#090a0f] border border-white/10">
+              {[
+                { key: 'all', label: `All (${claims.length})` },
+                {
+                  key: 'outgoing',
+                  label: `Filed (${claims.filter((c) => c.type === 'OUTGOING').length})`,
+                },
+                {
+                  key: 'incoming',
+                  label: `To Review (${claims.filter((c) => c.type === 'INCOMING').length})`,
+                },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key as 'all' | 'outgoing' | 'incoming')}
+                  className={`flex-1 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                    tab === t.key
+                      ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-win-shadow">
-                        <span>
-                          {c.type === 'OUTGOING' ? `Finder: ${c.finder}` : `Claimant: ${c.claimant}`}
-                        </span>
-                        <span>{c.date}</span>
-                      </div>
-                    </button>
-                  )
-                })}
+            {/* List */}
+            <div className="flex flex-col gap-2.5">
+              {filteredClaims.map((c) => {
+                const isSelected = selectedClaim?.id === c.id
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSelectedClaim(c)}
+                    className={`p-4 rounded-2xl text-left border transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? 'bg-indigo-600/15 border-indigo-500/50 shadow-md shadow-indigo-500/10'
+                        : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/15'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-xs text-white truncate">{c.itemTitle}</span>
+                      <ClaimStatusBadge status={c.status} />
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-zinc-400">
+                      <span className="font-mono text-zinc-500">#{c.id}</span>
+                      <span>
+                        {c.type === 'OUTGOING' ? `Finder: ${c.finder}` : `Claimant: ${c.claimant}`}
+                      </span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Selected Claim Inspector */}
+          {selectedClaim ? (
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col gap-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-white font-['var(--font-heading)']">
+                      {selectedClaim.itemTitle}
+                    </h3>
+                    <ClaimStatusBadge status={selectedClaim.status} />
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Claim ID: <span className="font-mono text-indigo-400">#{selectedClaim.id}</span> • Report:{' '}
+                    <span className="font-mono text-zinc-300">#{selectedClaim.reportId}</span>
+                  </p>
+                </div>
               </div>
 
-              <div className="bevel-groove p-2 text-[11px] text-win-shadow">
-                <strong>Anti-Fraud Protocol:</strong> Never hand over an item until verification answers are evaluated. Always meet at the campus safety desk.
+              {/* Questionnaire verification */}
+              <div>
+                <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold mb-3 flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>OWNERSHIP VERIFICATION TEST RESPONSES</span>
+                </h4>
+
+                <div className="flex flex-col gap-3">
+                  {selectedClaim.questions.map((q, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-[#090a0f] border border-white/10 flex flex-col gap-1.5"
+                    >
+                      <span className="text-xs font-semibold text-indigo-300">
+                        Q{idx + 1}: {q.question}
+                      </span>
+                      <p className="text-xs text-zinc-200 mt-1 pl-3 border-l-2 border-indigo-500/40 leading-relaxed">
+                        {q.answer ?? 'No response provided.'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Handover Spot */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-start gap-3">
+                <MapPin className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-semibold text-white block">Safe Handover Point</span>
+                  <span className="text-xs text-zinc-400 block mt-0.5">{selectedClaim.safeLocation}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+                <Link
+                  href={`/messages?report=${selectedClaim.reportId}`}
+                  className="px-4 py-2 rounded-full text-xs font-medium bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5"
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  Open Masked Chat
+                </Link>
+
+                {selectedClaim.type === 'INCOMING' && selectedClaim.status === 'UNDER_REVIEW' && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleReject(selectedClaim.id)}
+                      className="px-4 py-2 rounded-full text-xs font-semibold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition-colors flex items-center gap-1.5"
+                    >
+                      <XCircle className="h-3.5 w-3.5" />
+                      Reject Claim
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApprove(selectedClaim.id)}
+                      className="px-5 py-2 rounded-full text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition-colors flex items-center gap-1.5 shadow-lg shadow-emerald-500/20"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Approve &amp; Release
+                    </button>
+                  </div>
+                )}
+
+                {selectedClaim.status === 'VERIFIED' && (
+                  <div className="px-4 py-2 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>OWNERSHIP CONFIRMED — PICKUP ACTIVE</span>
+                  </div>
+                )}
               </div>
             </div>
-          </RetroWindow>
-
-          {/* Selected Claim Inspector & Action Window */}
-          {selectedClaim ? (
-            <RetroWindow
-              title={`Verification Inspector — ${selectedClaim.itemTitle} (#${selectedClaim.id})`}
-              icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden />}
-              controls={['minimize', 'maximize', 'close']}
-            >
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-win-face-light pb-2">
-                  <div>
-                    <h3 className="text-[14px] font-bold text-win-text">
-                      {selectedClaim.itemTitle}{' '}
-                      <span className="font-mono-sys text-[12px] text-win-shadow">
-                        (Report #{selectedClaim.reportId})
-                      </span>
-                    </h3>
-                    <p className="text-[11px] text-win-shadow">
-                      {selectedClaim.type === 'OUTGOING'
-                        ? `You are claiming this item from finder ${selectedClaim.finder}`
-                        : `Claimant ${selectedClaim.claimant} is claiming your found item`}
-                    </p>
-                  </div>
-                  <ClaimStatusBadge status={selectedClaim.status} />
-                </div>
-
-                {/* Verification Questions & Submitted Answers */}
-                <RetroGroupBox legend="Ownership Verification Test Responses">
-                  <div className="flex flex-col gap-3">
-                    {selectedClaim.questions.map((q, idx) => (
-                      <div key={idx} className="bevel-in bg-win-white p-2">
-                        <p className="flex items-center gap-1.5 text-[12px] font-bold text-win-title">
-                          <HelpCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                          Q{idx + 1}: {q.question}
-                        </p>
-                        <div className="mt-1 border-t border-win-face-light pt-1 text-[12px] text-win-text">
-                          <span className="font-bold text-win-shadow">Answer: </span>
-                          <span>{q.answer ?? 'No answer submitted yet.'}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </RetroGroupBox>
-
-                {/* Safe Handover Coordination */}
-                <RetroGroupBox legend="Safe Handover & Campus Meeting Point">
-                  <div className="flex flex-col gap-2 text-[12px]">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-win-green shrink-0" aria-hidden />
-                      <span className="font-bold">Location:</span>
-                      <span>{selectedClaim.safeLocation}</span>
-                    </div>
-                    <p className="text-[11px] text-win-shadow">
-                      Items must be exchanged in public during operational security hours (08:00–18:00).
-                    </p>
-                  </div>
-                </RetroGroupBox>
-
-                {/* Actions depending on role and status */}
-                <div className="bevel-out bg-win-face-light flex flex-wrap items-center justify-between gap-2 p-2">
-                  <Link href="/messages">
-                    <RetroButton className="gap-1.5 text-[12px]">
-                      <MessageSquare className="h-3.5 w-3.5" aria-hidden />
-                      Open Secure Chat
-                    </RetroButton>
-                  </Link>
-
-                  {selectedClaim.type === 'INCOMING' && selectedClaim.status === 'UNDER_REVIEW' && (
-                    <div className="flex gap-2">
-                      <RetroButton
-                        onClick={() => handleReject(selectedClaim.id)}
-                        className="gap-1 text-win-red text-[12px]"
-                      >
-                        <XCircle className="h-3.5 w-3.5" aria-hidden />
-                        Reject Claim
-                      </RetroButton>
-                      <RetroButton
-                        onClick={() => handleApprove(selectedClaim.id)}
-                        variant="primary"
-                        className="gap-1 text-win-green text-[12px]"
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                        Approve & Release
-                      </RetroButton>
-                    </div>
-                  )}
-
-                  {selectedClaim.status === 'VERIFIED' && (
-                    <div className="flex items-center gap-1.5 text-[12px] font-bold text-win-green">
-                      <CheckCircle2 className="h-4 w-4" aria-hidden />
-                      OWNERSHIP CONFIRMED — READY FOR HANDOVER
-                    </div>
-                  )}
-                </div>
-
-                <RetroStatusBar
-                  segments={[
-                    <span key="id" className="font-mono-sys">
-                      CLAIM RECORD: #{selectedClaim.id}
-                    </span>,
-                    <RetroBadge key="sec" tone="green">
-                      VERIFIED ENCLAVE
-                    </RetroBadge>,
-                  ]}
-                />
-              </div>
-            </RetroWindow>
           ) : null}
         </div>
       </div>
-    </DesktopShell>
+    </ModernShell>
   )
 }
 
 function ClaimStatusBadge({ status }: { status: Claim['status'] }) {
   switch (status) {
     case 'VERIFIED':
-      return <RetroBadge tone="green">VERIFIED</RetroBadge>
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+          VERIFIED
+        </span>
+      )
     case 'UNDER_REVIEW':
-      return <RetroBadge tone="yellow">UNDER REVIEW</RetroBadge>
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30">
+          UNDER REVIEW
+        </span>
+      )
     case 'REJECTED':
-      return <RetroBadge tone="red">REJECTED</RetroBadge>
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-rose-500/15 text-rose-300 border border-rose-500/30">
+          REJECTED
+        </span>
+      )
     default:
-      return <RetroBadge tone="neutral">PENDING</RetroBadge>
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-white/10 text-zinc-400 border border-white/10">
+          PENDING
+        </span>
+      )
   }
 }

@@ -12,16 +12,10 @@ import {
   AlertTriangle,
   Lock,
   RotateCcw,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react'
-import { DesktopShell } from '@/components/shell/desktop-shell'
-import {
-  RetroWindow,
-  RetroButton,
-  RetroInput,
-  RetroBadge,
-  RetroStatusBar,
-  RetroDialog,
-} from '@/components/retro'
+import { ModernShell } from '@/components/shell/modern-shell'
 import { CONVERSATIONS, type Conversation } from '@/lib/mock-data'
 
 export default function MessagesPage() {
@@ -58,12 +52,12 @@ export default function MessagesPage() {
     )
     setInputMessage('')
 
-    // Auto reply simulation after 1.5s
+    // Simulated reply
     setTimeout(() => {
       const replyMsg = {
         id: `m_rep_${Date.now()}`,
         from: 'them' as const,
-        body: 'Understood! I will bring the item to the security desk at the scheduled time.',
+        body: 'Understood! I will bring the item to the campus security desk at the designated time.',
         at: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       }
 
@@ -83,219 +77,157 @@ export default function MessagesPage() {
   }
 
   return (
-    <DesktopShell activeKey="messages">
-      <div className="flex flex-col gap-3">
-        {/* Report Abuse Modal */}
-        <RetroDialog
-          open={reportModalOpen}
-          onClose={() => setReportModalOpen(false)}
-          title="REPORT CONVERSATION TO MODERATOR"
-          icon={<ShieldAlert className="h-4 w-4 text-win-red" aria-hidden />}
-          className="max-w-md"
-        >
-          <div className="flex flex-col gap-3">
-            <p className="text-[12px]">
-              Flag user <strong>{activeConv?.withUser}</strong> regarding report{' '}
-              <strong>#{activeConv?.reportId}</strong>?
-            </p>
-            <div className="bevel-field bg-win-white p-2">
-              <label className="text-[11px] font-bold text-win-shadow">Reason for report:</label>
-              <select className="bevel-out mt-1 w-full bg-win-face p-1 text-[12px]">
-                <option>Suspicious claim / false identity</option>
-                <option>Harassment or spam</option>
-                <option>Off-platform money/fee demand</option>
-                <option>Refusal to meet at verified safe location</option>
-              </select>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <RetroButton
-                variant="primary"
-                onClick={() => {
-                  setReportModalOpen(false)
-                  alert('Report submitted to system moderators for security triage.')
-                }}
-              >
-                Submit Report
-              </RetroButton>
-              <RetroButton onClick={() => setReportModalOpen(false)}>Cancel</RetroButton>
-            </div>
+    <ModernShell
+      activeKey="messages"
+      title="Masked Campus Messaging"
+      subtitle="Communicate safely with finders and claimants through an anonymous, encrypted relay."
+      badge="ZERO-CONTACT EXPOSURE"
+    >
+      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+        {/* Conversation List */}
+        <div className="p-5 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col gap-3">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs font-mono text-zinc-400">
+            <span className="font-bold text-white uppercase">INBOX CHANNELS</span>
+            <span>{conversations.length} CONVERSATIONS</span>
           </div>
-        </RetroDialog>
 
-        {/* Block User Modal */}
-        <RetroDialog
-          open={blockedModalOpen}
-          onClose={() => setBlockedModalOpen(false)}
-          title="BLOCK USER"
-          icon={<UserX className="h-4 w-4 text-win-red" aria-hidden />}
-          className="max-w-sm"
-        >
-          <div className="flex flex-col gap-3">
-            <p className="text-[12px]">
-              Are you sure you want to block <strong>{activeConv?.withUser}</strong>? They will no longer be able to message you or view your active claims.
-            </p>
-            <div className="flex justify-end gap-2 pt-1">
-              <RetroButton
-                variant="primary"
-                onClick={() => {
-                  setBlockedModalOpen(false)
-                  alert(`User ${activeConv?.withUser} has been blocked.`)
-                }}
-              >
-                Confirm Block
-              </RetroButton>
-              <RetroButton onClick={() => setBlockedModalOpen(false)}>Cancel</RetroButton>
-            </div>
+          <div className="flex flex-col gap-2">
+            {conversations.map((c) => {
+              const isSelected = activeConv?.id === c.id
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setActiveId(c.id)}
+                  className={`p-3.5 rounded-2xl text-left border transition-all duration-200 cursor-pointer ${
+                    isSelected
+                      ? 'bg-indigo-600/15 border-indigo-500/40 shadow-sm'
+                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/15'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-white">{c.withUser}</span>
+                    <span className="text-[10px] font-mono text-zinc-500">{c.lastAt}</span>
+                  </div>
+
+                  <div className="mt-1 flex items-center gap-1 text-[11px] text-indigo-400 font-medium">
+                    <Tag className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{c.reportTitle}</span>
+                  </div>
+
+                  <p className="mt-1 text-xs text-zinc-400 line-clamp-1">{c.lastMessage}</p>
+
+                  {c.unread > 0 && (
+                    <span className="mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {c.unread} NEW
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
-        </RetroDialog>
+        </div>
 
-        <div className="grid gap-3 lg:grid-cols-[260px_1fr]">
-          {/* Conversation List */}
-          <RetroWindow
-            title="Inbox Folders"
-            icon={<MessageSquare className="h-3.5 w-3.5" aria-hidden />}
-            controls={['minimize', 'close']}
-          >
-            <div className="flex flex-col gap-1">
-              <div className="bevel-groove mb-1 p-1 text-[11px] font-bold text-win-shadow">
-                ACTIVE CHANNELS ({conversations.length})
-              </div>
-
-              {conversations.map((c) => {
-                const isSelected = activeConv?.id === c.id
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setActiveId(c.id)}
-                    className={`flex flex-col gap-1 p-2 text-left transition-colors dotted-focus ${
-                      isSelected ? 'bevel-in bg-win-white' : 'bevel-out bg-win-face hover:bg-win-face-light'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[13px] text-win-text">{c.withUser}</span>
-                      <span className="font-mono-sys text-[10px] text-win-shadow">{c.lastAt}</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-[11px] text-win-title font-bold">
-                      <Tag className="h-3 w-3 shrink-0" aria-hidden />
-                      <span className="truncate">{c.reportTitle}</span>
-                    </div>
-
-                    <p className="line-clamp-1 text-[11px] text-win-shadow">{c.lastMessage}</p>
-
-                    {c.unread > 0 && (
-                      <RetroBadge tone="yellow" className="self-start text-[9px]">
-                        {c.unread} NEW
-                      </RetroBadge>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </RetroWindow>
-
-          {/* Active Chat Conversation Pane */}
-          {activeConv ? (
-            <RetroWindow
-              title={`Secure Channel: ${activeConv.withUser} — [${activeConv.reportTitle}]`}
-              icon={<Lock className="h-3.5 w-3.5 text-win-green" aria-hidden />}
-              controls={['minimize', 'maximize', 'close']}
-            >
-              <div className="flex flex-col gap-3">
-                {/* Safety Warning Header */}
-                <div className="bevel-out bg-win-yellow flex items-center justify-between p-2 text-[12px] text-win-text">
+        {/* Active Chat Conversation Pane */}
+        {activeConv ? (
+          <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col justify-between min-h-[500px]">
+            <div>
+              {/* Header */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+                <div>
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-win-green shrink-0" aria-hidden />
-                    <span>
-                      Protected by LOST//98 Relay. Never send passwords or money transfers.
+                    <h3 className="text-base font-bold text-white font-['var(--font-heading)']">
+                      {activeConv.withUser}
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                      MASKED RELAY
                     </span>
                   </div>
-
-                  <div className="flex items-center gap-1">
-                    <Link href={`/search/${activeConv.reportId}`}>
-                      <RetroButton className="px-1.5 py-0.5 text-[11px]">
-                        View Item #{activeConv.reportId}
-                      </RetroButton>
-                    </Link>
-                    <RetroButton
-                      onClick={() => setReportModalOpen(true)}
-                      className="px-1.5 py-0.5 text-[11px] text-win-red"
-                    >
-                      Report
-                    </RetroButton>
-                    <RetroButton
-                      onClick={() => setBlockedModalOpen(true)}
-                      className="px-1.5 py-0.5 text-[11px]"
-                    >
-                      Block
-                    </RetroButton>
-                  </div>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Regarding Item:{' '}
+                    <strong className="text-zinc-200">{activeConv.reportTitle}</strong> (
+                    <span className="font-mono text-indigo-400">#{activeConv.reportId}</span>)
+                  </p>
                 </div>
 
-                {/* Message Scroll View */}
-                <div className="bevel-field retro-scroll flex h-80 flex-col gap-2 overflow-y-auto bg-win-white p-3">
-                  <div className="my-2 border-b border-win-face-light pb-1 text-center text-[10px] text-win-shadow">
-                    --- ENCRYPTED SESSION INITIALIZED ON ITEM #{activeConv.reportId} ---
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/search/${activeConv.reportId}`}
+                    className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1"
+                  >
+                    <span>View Item</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
 
-                  {activeConv.messages.map((m) => (
+              {/* Notice */}
+              <div className="my-3 p-3 rounded-2xl bg-white/[0.02] border border-white/5 text-[11px] text-zinc-400 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span>Your real phone number and identity are masked by the system.</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setReportModalOpen(true)}
+                  className="text-rose-400 hover:text-rose-300 transition-colors"
+                >
+                  Report User
+                </button>
+              </div>
+
+              {/* Message Feed */}
+              <div className="flex flex-col gap-3 py-4 max-h-[360px] overflow-y-auto pr-1">
+                {activeConv.messages.map((m) => {
+                  const isMe = m.from === 'me'
+                  return (
                     <div
                       key={m.id}
                       className={`flex flex-col max-w-[80%] ${
-                        m.from === 'me' ? 'self-end items-end' : 'self-start items-start'
+                        isMe ? 'self-end items-end' : 'self-start items-start'
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 text-[10px] text-win-shadow">
-                        <span className="font-bold">
-                          {m.from === 'me' ? 'You (U-2048)' : activeConv.withUser}
-                        </span>
+                      <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 mb-1">
+                        <span>{isMe ? 'You' : activeConv.withUser}</span>
+                        <span>•</span>
                         <span>{m.at}</span>
                       </div>
-
                       <div
-                        className={`p-2 text-[13px] leading-relaxed mt-0.5 ${
-                          m.from === 'me'
-                            ? 'bevel-out bg-win-title text-win-title-text font-medium'
-                            : 'bevel-out bg-win-face text-win-text'
+                        className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
+                          isMe
+                            ? 'bg-indigo-600 text-white rounded-br-none shadow-md shadow-indigo-600/20'
+                            : 'bg-[#10111a] border border-white/10 text-zinc-200 rounded-bl-none'
                         }`}
                       >
                         {m.body}
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                {/* Message Input Bar */}
-                <form onSubmit={handleSendMessage} className="flex gap-2">
-                  <RetroInput
-                    placeholder="Type a secure message..."
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    className="flex-1"
-                  />
-                  <RetroButton type="submit" variant="primary" className="gap-1.5">
-                    <Send className="h-3.5 w-3.5" aria-hidden />
-                    Send
-                  </RetroButton>
-                </form>
-
-                <RetroStatusBar
-                  segments={[
-                    <span key="chan" className="flex items-center gap-1">
-                      <Lock className="h-3.5 w-3.5 text-win-green" aria-hidden />
-                      CHANNEL: {activeConv.id}
-                    </span>,
-                    <span key="sec" className="text-win-shadow">
-                      Zero Personal Contact Exposure
-                    </span>,
-                  ]}
-                />
+                  )
+                })}
               </div>
-            </RetroWindow>
-          ) : null}
-        </div>
+            </div>
+
+            {/* Input Bar */}
+            <form onSubmit={handleSendMessage} className="mt-4 pt-3 border-t border-white/10 flex gap-2">
+              <input
+                type="text"
+                placeholder="Type a secure message..."
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                className="flex-1 px-4 py-2.5 rounded-full text-xs bg-[#090a0f] border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={!inputMessage.trim()}
+                className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200 disabled:opacity-50 disabled:pointer-events-none transition-colors flex items-center gap-1.5 shadow-md"
+              >
+                <span>Send</span>
+                <Send className="h-3.5 w-3.5" />
+              </button>
+            </form>
+          </div>
+        ) : null}
       </div>
-    </DesktopShell>
+    </ModernShell>
   )
 }

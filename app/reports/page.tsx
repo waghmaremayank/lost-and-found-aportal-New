@@ -16,17 +16,9 @@ import {
   FolderOpen,
   CheckSquare,
   AlertCircle,
+  X,
 } from 'lucide-react'
-import { DesktopShell } from '@/components/shell/desktop-shell'
-import {
-  RetroWindow,
-  RetroButton,
-  RetroBadge,
-  RetroGroupBox,
-  RetroStatusBar,
-  RetroTabs,
-  RetroDialog,
-} from '@/components/retro'
+import { ModernShell } from '@/components/shell/modern-shell'
 import { MY_REPORTS, ITEMS, type UserReport, type ReportStatus } from '@/lib/mock-data'
 import { ItemStatusBadge } from '@/components/items/item-card'
 
@@ -54,250 +46,251 @@ export default function MyReportsPage() {
   }
 
   return (
-    <DesktopShell activeKey="reports">
-      <div className="flex flex-col gap-3">
-        {/* Printable Official Report Card Modal */}
-        {printModalReport && (
-          <RetroDialog
-            open={!!printModalReport}
-            onClose={() => setPrintModalReport(null)}
-            title={`OFFICIAL CASE SUMMARY #${printModalReport.id}`}
-            icon={<Printer className="h-4 w-4" aria-hidden />}
-            className="max-w-lg"
+    <ModernShell
+      activeKey="reports"
+      title="My Reports Directory"
+      subtitle="Track your active lost cases, submitted found property, and AI similarity match status."
+      badge="USER U-2048"
+      action={
+        <div className="flex items-center gap-2">
+          <Link
+            href="/lost"
+            className="px-4 py-2 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 border border-rose-500/30 transition-colors"
           >
-            <div className="bevel-in bg-win-white flex flex-col gap-3 p-4 text-win-text">
-              <div className="border-b-2 border-win-dark pb-2 text-center">
-                <p className="font-pixel text-base">LOST//98 SYSTEM CASE RECORD</p>
-                <p className="text-[11px] text-win-shadow">
-                  CONFIDENTIAL COMMUNITY LOST & FOUND DISPATCH
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-[12px]">
-                <div>
-                  <span className="font-bold">REPORT ID:</span> #{printModalReport.id}
-                </div>
-                <div>
-                  <span className="font-bold">TYPE:</span> {printModalReport.type}
-                </div>
-                <div>
-                  <span className="font-bold">ITEM:</span> {printModalReport.title}
-                </div>
-                <div>
-                  <span className="font-bold">CATEGORY:</span> {printModalReport.category}
-                </div>
-                <div>
-                  <span className="font-bold">LOCATION:</span> {printModalReport.generalLocation}
-                </div>
-                <div>
-                  <span className="font-bold">DATE:</span> {printModalReport.dateOccurred}
-                </div>
-                <div className="col-span-2">
-                  <span className="font-bold">STATUS:</span> {printModalReport.status}
-                </div>
-              </div>
-
-              <div className="bevel-field bg-win-face-light p-2 text-[12px]">
-                <p className="font-bold">PUBLIC DESCRIPTION:</p>
-                <p>{printModalReport.description}</p>
-              </div>
-
-              <div className="border-t border-dashed border-win-shadow pt-2 text-[10px] text-win-shadow">
-                Cryptographic Signature: SHA-256: 8f4a9b2...verified by campus auth service.
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <RetroButton onClick={() => window.print()} variant="primary" className="gap-1.5">
-                  <Printer className="h-3.5 w-3.5" aria-hidden />
-                  Print / Save PDF
-                </RetroButton>
-                <RetroButton onClick={() => setPrintModalReport(null)}>Close</RetroButton>
-              </div>
-            </div>
-          </RetroDialog>
-        )}
-
-        {/* Toast Notification */}
+            + Report Lost
+          </Link>
+          <Link
+            href="/found"
+            className="px-4 py-2 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30 transition-colors"
+          >
+            + Report Found
+          </Link>
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        {/* Toast */}
         {toastMessage && (
-          <div className="bevel-out bg-win-yellow flex items-center justify-between p-2.5 text-[13px] font-bold text-win-text">
+          <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center justify-between backdrop-blur-xl animate-in fade-in">
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-win-green" aria-hidden />
+              <CheckCircle2 className="h-4 w-4" />
               {toastMessage}
             </span>
             <button
               type="button"
               onClick={() => setToastMessage(null)}
-              className="text-[11px] font-bold text-win-shadow hover:text-win-dark"
+              className="text-zinc-400 hover:text-white"
             >
               ✕
             </button>
           </div>
         )}
 
-        <RetroWindow
-          title="My Reports Directory — [User U-2048]"
-          icon={<PackageSearch className="h-3.5 w-3.5" aria-hidden />}
-          controls={['minimize', 'maximize', 'close']}
-        >
-          <div className="flex flex-col gap-4">
-            {/* Quick Action Header */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <RetroTabs
-                  tabs={[
-                    { key: 'all', label: `All Reports (${reports.length})` },
-                    { key: 'lost', label: `Lost (${reports.filter((r) => r.type === 'LOST').length})` },
-                    { key: 'found', label: `Found (${reports.filter((r) => r.type === 'FOUND').length})` },
-                    {
-                      key: 'resolved',
-                      label: `Resolved (${reports.filter((r) => r.status === 'RESOLVED').length})`,
-                    },
-                  ]}
-                  active={tab}
-                  onChange={setTab}
-                />
+        {/* Printable Summary Modal */}
+        {printModalReport && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative w-full max-w-lg rounded-3xl bg-[#12131d] border border-white/15 p-6 shadow-2xl">
+              <button
+                type="button"
+                onClick={() => setPrintModalReport(null)}
+                aria-label="Close summary modal"
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="border-b border-white/10 pb-3 text-center">
+                <span className="text-xs font-mono text-indigo-400 font-bold uppercase">CAMPUS LOST &amp; FOUND RECORD</span>
+                <h3 className="text-lg font-bold text-white mt-1">Official Case Receipt</h3>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Link href="/lost">
-                  <RetroButton variant="primary" className="gap-1 text-[12px]">
-                    <FilePlus2 className="h-3.5 w-3.5" aria-hidden />
-                    Report Lost
-                  </RetroButton>
-                </Link>
-                <Link href="/found">
-                  <RetroButton className="gap-1 text-[12px]">
-                    <MapPin className="h-3.5 w-3.5" aria-hidden />
-                    Report Found
-                  </RetroButton>
-                </Link>
+              <div className="grid grid-cols-2 gap-3 mt-4 text-xs">
+                <div className="p-3 rounded-xl bg-white/[0.03]">
+                  <span className="text-zinc-500 block text-[10px] font-mono">REPORT ID</span>
+                  <strong className="text-white">#{printModalReport.id}</strong>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03]">
+                  <span className="text-zinc-500 block text-[10px] font-mono">TYPE</span>
+                  <strong className="text-white">{printModalReport.type}</strong>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03]">
+                  <span className="text-zinc-500 block text-[10px] font-mono">ITEM</span>
+                  <strong className="text-white">{printModalReport.title}</strong>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03]">
+                  <span className="text-zinc-500 block text-[10px] font-mono">LOCATION</span>
+                  <strong className="text-white">{printModalReport.generalLocation}</strong>
+                </div>
+              </div>
+
+              <div className="mt-3 p-3 rounded-xl bg-white/[0.03] text-xs text-zinc-300">
+                <span className="text-zinc-500 block text-[10px] font-mono mb-1">DESCRIPTION</span>
+                {printModalReport.description}
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setPrintModalReport(null)}
+                  className="px-4 py-2 rounded-full text-xs font-medium text-zinc-400 hover:text-white"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-5 py-2 rounded-full text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200 transition-colors flex items-center gap-1.5"
+                >
+                  <Printer className="h-3.5 w-3.5" />
+                  Print Receipt
+                </button>
               </div>
             </div>
-
-            {/* Filter Bar */}
-            <RetroGroupBox legend="Report Status Filter">
-              <div className="flex flex-wrap items-center gap-2">
-                {(['ALL', 'ACTIVE', 'MATCHED', 'CLAIMED', 'RESOLVED', 'CLOSED'] as const).map(
-                  (st) => (
-                    <RetroButton
-                      key={st}
-                      type="button"
-                      onClick={() => setStatusFilter(st)}
-                      className={`text-[11px] ${
-                        statusFilter === st ? 'bevel-in font-bold' : ''
-                      }`}
-                    >
-                      {st}
-                    </RetroButton>
-                  ),
-                )}
-              </div>
-            </RetroGroupBox>
-
-            {/* Reports Explorer Table */}
-            {filteredReports.length === 0 ? (
-              <div className="bevel-in bg-win-white flex flex-col items-center justify-center gap-2 p-10 text-center">
-                <FolderOpen className="h-10 w-10 text-win-shadow" aria-hidden />
-                <p className="font-pixel text-sm text-win-title">DIRECTORY EMPTY</p>
-                <p className="text-[12px] text-win-shadow">
-                  No reports found matching the selected folder or filter.
-                </p>
-              </div>
-            ) : (
-              <div className="bevel-field retro-scroll overflow-x-auto bg-win-white">
-                <table className="w-full text-left text-[12px]">
-                  <thead className="bevel-out bg-win-face text-[11px] font-bold text-win-text">
-                    <tr>
-                      <th className="px-2 py-2">Report ID</th>
-                      <th className="px-2 py-2">Type</th>
-                      <th className="px-2 py-2">Item Title</th>
-                      <th className="px-2 py-2">Location</th>
-                      <th className="px-2 py-2">Date Occurred</th>
-                      <th className="px-2 py-2">Status</th>
-                      <th className="px-2 py-2">Matches</th>
-                      <th className="px-2 py-2 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-win-face-light">
-                    {filteredReports.map((item) => (
-                      <tr key={item.id} className="hover:bg-win-title/10">
-                        <td className="font-mono-sys px-2 py-2 font-bold text-win-title">
-                          #{item.id}
-                        </td>
-                        <td className="px-2 py-2">
-                          <RetroBadge tone={item.type === 'LOST' ? 'red' : 'green'}>
-                            {item.type}
-                          </RetroBadge>
-                        </td>
-                        <td className="px-2 py-2 font-bold">
-                          <div>{item.title}</div>
-                          <span className="text-[11px] font-normal text-win-shadow">{item.category}</span>
-                        </td>
-                        <td className="px-2 py-2">{item.generalLocation}</td>
-                        <td className="px-2 py-2 text-win-shadow">{item.dateOccurred}</td>
-                        <td className="px-2 py-2">
-                          <ItemStatusBadge status={item.status} />
-                        </td>
-                        <td className="px-2 py-2">
-                          {item.possibleMatches > 0 ? (
-                            <Link href={`/search?q=${encodeURIComponent(item.title)}`}>
-                              <span className="bevel-out bg-win-yellow inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-bold text-win-text">
-                                <Sparkles className="h-3 w-3 text-win-title" aria-hidden />
-                                {item.possibleMatches} Match{item.possibleMatches === 1 ? '' : 'es'}
-                              </span>
-                            </Link>
-                          ) : (
-                            <span className="text-[11px] text-win-shadow">0 detected</span>
-                          )}
-                        </td>
-                        <td className="px-2 py-2 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Link href={`/search/${item.id}`}>
-                              <RetroButton className="px-2 py-0.5 text-[11px]" title="Inspect report">
-                                View
-                              </RetroButton>
-                            </Link>
-                            <RetroButton
-                              onClick={() => setPrintModalReport(item)}
-                              className="px-2 py-0.5 text-[11px]"
-                              title="Print report record"
-                            >
-                              <Printer className="h-3 w-3" aria-hidden />
-                            </RetroButton>
-                            {item.status !== 'RESOLVED' && item.status !== 'CLOSED' && (
-                              <RetroButton
-                                onClick={() => handleResolve(item.id)}
-                                variant="primary"
-                                className="px-2 py-0.5 text-[11px] text-win-green"
-                                title="Mark item as recovered"
-                              >
-                                Resolve
-                              </RetroButton>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Status bar */}
-            <RetroStatusBar
-              segments={[
-                <span key="st" className="flex items-center gap-1">
-                  <PackageSearch className="h-3.5 w-3.5" aria-hidden />
-                  {filteredReports.length} user record{filteredReports.length === 1 ? '' : 's'} displayed
-                </span>,
-                <RetroBadge key="sec" tone="green">
-                  AUTHENTICATED AS U-2048
-                </RetroBadge>,
-              ]}
-            />
           </div>
-        </RetroWindow>
+        )}
+
+        {/* Directory Card */}
+        <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col gap-5">
+          {/* Tabs */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+            <div className="flex items-center gap-1 p-1 rounded-2xl bg-[#090a0f] border border-white/10">
+              {[
+                { key: 'all', label: `All Reports (${reports.length})` },
+                { key: 'lost', label: `Lost (${reports.filter((r) => r.type === 'LOST').length})` },
+                { key: 'found', label: `Found (${reports.filter((r) => r.type === 'FOUND').length})` },
+                {
+                  key: 'resolved',
+                  label: `Resolved (${reports.filter((r) => r.status === 'RESOLVED').length})`,
+                },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  className={`px-4 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                    tab === t.key
+                      ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Status Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+              {(['ALL', 'ACTIVE', 'MATCHED', 'CLAIMED', 'RESOLVED'] as const).map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => setStatusFilter(st)}
+                  className={`px-3 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                    statusFilter === st
+                      ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                      : 'bg-white/[0.02] text-zinc-400 border-white/5 hover:text-white'
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Table */}
+          {filteredReports.length === 0 ? (
+            <div className="py-12 text-center">
+              <FolderOpen className="h-10 w-10 text-zinc-600 mx-auto mb-2" />
+              <p className="text-sm font-bold text-white">No reports in this category</p>
+              <p className="text-xs text-zinc-400 mt-1">Try selecting another filter or report a new item.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-white/10 text-[11px] font-mono uppercase text-zinc-500">
+                    <th className="pb-3 font-semibold">Report ID</th>
+                    <th className="pb-3 font-semibold">Type</th>
+                    <th className="pb-3 font-semibold">Item Title</th>
+                    <th className="pb-3 font-semibold">Location</th>
+                    <th className="pb-3 font-semibold">Date</th>
+                    <th className="pb-3 font-semibold">Status</th>
+                    <th className="pb-3 font-semibold">Matches</th>
+                    <th className="pb-3 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filteredReports.map((item) => (
+                    <tr key={item.id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="py-3.5 font-mono font-bold text-indigo-400">#{item.id}</td>
+                      <td className="py-3.5">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                            item.type === 'LOST'
+                              ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                              : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          }`}
+                        >
+                          {item.type}
+                        </span>
+                      </td>
+                      <td className="py-3.5">
+                        <div className="font-bold text-white">{item.title}</div>
+                        <div className="text-[11px] text-zinc-500">{item.category}</div>
+                      </td>
+                      <td className="py-3.5 text-zinc-400">{item.generalLocation}</td>
+                      <td className="py-3.5 text-zinc-500 font-mono text-[11px]">{item.dateOccurred}</td>
+                      <td className="py-3.5">
+                        <ItemStatusBadge status={item.status} />
+                      </td>
+                      <td className="py-3.5">
+                        {item.possibleMatches > 0 ? (
+                          <Link
+                            href={`/search?q=${encodeURIComponent(item.title)}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25 transition-colors"
+                          >
+                            <Sparkles className="h-3 w-3" />
+                            <span>{item.possibleMatches} Match</span>
+                          </Link>
+                        ) : (
+                          <span className="text-[11px] text-zinc-600">0 detected</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Link
+                            href={`/search/${item.id}`}
+                            className="px-3 py-1 rounded-full text-xs font-medium bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                          >
+                            View
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => setPrintModalReport(item)}
+                            aria-label="Print report summary"
+                            className="h-7 w-7 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/10 flex items-center justify-center transition-colors"
+                          >
+                            <Printer className="h-3.5 w-3.5" />
+                          </button>
+                          {item.status !== 'RESOLVED' && item.status !== 'CLOSED' && (
+                            <button
+                              type="button"
+                              onClick={() => handleResolve(item.id)}
+                              className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30 transition-colors"
+                            >
+                              Resolve
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
-    </DesktopShell>
+    </ModernShell>
   )
 }

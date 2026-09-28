@@ -15,17 +15,9 @@ import {
   RotateCcw,
   CheckCircle2,
   Trash2,
+  ExternalLink,
 } from 'lucide-react'
-import { DesktopShell } from '@/components/shell/desktop-shell'
-import {
-  RetroWindow,
-  RetroButton,
-  RetroBadge,
-  RetroGroupBox,
-  RetroStatusBar,
-  RetroTabs,
-  RetroDialog,
-} from '@/components/retro'
+import { ModernShell } from '@/components/shell/modern-shell'
 import {
   ADMIN_METRICS,
   ADMIN_USERS,
@@ -37,7 +29,7 @@ import {
 } from '@/lib/mock-data'
 
 export default function AdminConsolePage() {
-  const [tab, setTab] = useState<'users' | 'abuse' | 'events' | 'overview'>('overview')
+  const [tab, setTab] = useState<'overview' | 'users' | 'abuse' | 'events'>('overview')
   const [users, setUsers] = useState<AdminUser[]>(ADMIN_USERS)
   const [abuseReports, setAbuseReports] = useState<AbuseReport[]>(ABUSE_REPORTS)
   const [events, setEvents] = useState<SecurityEvent[]>(SECURITY_EVENTS)
@@ -53,7 +45,7 @@ export default function AdminConsolePage() {
         return u
       }),
     )
-    setToast(`User ${userId} status toggled.`)
+    setToast(`User ${userId} moderation status updated.`)
     setTimeout(() => setToast(null), 3000)
   }
 
@@ -66,244 +58,288 @@ export default function AdminConsolePage() {
   }
 
   return (
-    <DesktopShell activeKey="admin">
-      <div className="flex flex-col gap-3">
+    <ModernShell
+      activeKey="admin"
+      title="Admin &amp; Security Operations"
+      subtitle="Moderator dashboard for user access, dispute arbitration, and automated threat defense."
+      badge="STAFF LEVEL 3"
+    >
+      <div className="flex flex-col gap-6">
         {/* Toast */}
         {toast && (
-          <div className="bevel-out bg-win-yellow flex items-center justify-between p-2.5 text-[13px] font-bold text-win-text">
+          <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center justify-between backdrop-blur-xl animate-in fade-in">
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-win-green" aria-hidden />
+              <CheckCircle2 className="h-4 w-4" />
               {toast}
             </span>
             <button
               type="button"
               onClick={() => setToast(null)}
-              className="text-[11px] font-bold text-win-shadow hover:text-win-dark"
+              className="text-zinc-400 hover:text-white"
             >
               ✕
             </button>
           </div>
         )}
 
-        <RetroWindow
-          title="LOST//98 Administrative & Security Operations Console"
-          icon={<ShieldAlert className="h-3.5 w-3.5 text-win-red" aria-hidden />}
-          controls={['minimize', 'maximize', 'close']}
-        >
-          <div className="flex flex-col gap-4">
-            {/* Top Navigation Tabs */}
-            <RetroTabs
-              tabs={[
-                { key: 'overview', label: 'System Overview' },
-                { key: 'users', label: `User Directory (${users.length})` },
-                { key: 'abuse', label: `Abuse Reports (${abuseReports.filter((a) => a.status !== 'RESOLVED').length} Open)` },
-                { key: 'events', label: `Security Incidents (${events.length})` },
-              ]}
-              active={tab}
-              onChange={(k) => setTab(k as typeof tab)}
-            />
+        {/* Tab Selector */}
+        <div className="flex items-center gap-1 p-1 rounded-2xl bg-[#12131d] border border-white/10 overflow-x-auto scrollbar-none">
+          {[
+            { key: 'overview', label: 'System Health' },
+            { key: 'users', label: `Users (${users.length})` },
+            {
+              key: 'abuse',
+              label: `Disputes (${abuseReports.filter((a) => a.status !== 'RESOLVED').length} Open)`,
+            },
+            { key: 'events', label: `Security Incidents (${events.length})` },
+          ].map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setTab(t.key as typeof tab)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                tab === t.key
+                  ? 'bg-white text-zinc-950 shadow-md'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-            {/* TAB: SYSTEM OVERVIEW */}
-            {tab === 'overview' && (
-              <div className="flex flex-col gap-4">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="bevel-in bg-win-white p-3">
-                    <p className="text-[11px] font-bold uppercase text-win-shadow">Active Reports</p>
-                    <p className="font-pixel mt-1 text-2xl text-win-title">{ADMIN_METRICS.activeReports}</p>
-                    <p className="mt-1 text-[11px] text-win-shadow">
-                      {ADMIN_METRICS.lostReports} lost • {ADMIN_METRICS.foundReports} found
-                    </p>
-                  </div>
-
-                  <div className="bevel-in bg-win-white p-3">
-                    <p className="text-[11px] font-bold uppercase text-win-shadow">Resolved & Returned</p>
-                    <p className="font-pixel mt-1 text-2xl text-win-green">{ADMIN_METRICS.resolvedCases}</p>
-                    <p className="mt-1 text-[11px] text-win-green">98.2% accuracy</p>
-                  </div>
-
-                  <div className="bevel-in bg-win-white p-3">
-                    <p className="text-[11px] font-bold uppercase text-win-shadow">Pending Claims</p>
-                    <p className="font-pixel mt-1 text-2xl text-win-title">{ADMIN_METRICS.pendingClaims}</p>
-                    <p className="mt-1 text-[11px] text-win-shadow">Awaiting quiz answers</p>
-                  </div>
-
-                  <div className="bevel-in bg-win-white p-3">
-                    <p className="text-[11px] font-bold uppercase text-win-shadow">Security Threat Level</p>
-                    <p className="font-pixel mt-1 text-2xl text-win-red">ELEVATED</p>
-                    <p className="mt-1 text-[11px] text-win-red">
-                      {ADMIN_METRICS.flaggedUsers} flagged users • {ADMIN_METRICS.securityEvents} events
-                    </p>
-                  </div>
+        {/* TAB: SYSTEM OVERVIEW */}
+        {tab === 'overview' && (
+          <div className="flex flex-col gap-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="p-5 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl">
+                <span className="text-[10px] uppercase font-mono text-zinc-500 font-semibold">Active Inventory</span>
+                <div className="text-3xl font-extrabold text-white mt-1 font-['var(--font-heading)']">
+                  {ADMIN_METRICS.activeReports}
                 </div>
-
-                <RetroGroupBox legend="Automated Protection Engine Status">
-                  <div className="grid gap-2 text-[12px] sm:grid-cols-2">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-win-green" aria-hidden />
-                      <span>PostgreSQL Row Level Security: <strong>ACTIVE</strong></span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-win-green" aria-hidden />
-                      <span>Spam / Flood Rate Limiting: <strong>ENFORCING (10 req/min)</strong></span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-win-green" aria-hidden />
-                      <span>Malware / MIME Upload Filter: <strong>STRICT</strong></span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-win-green" aria-hidden />
-                      <span>Secret Identifiers Encryption: <strong>AES-256-GCM</strong></span>
-                    </div>
-                  </div>
-                </RetroGroupBox>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  {ADMIN_METRICS.lostReports} lost • {ADMIN_METRICS.foundReports} found
+                </p>
               </div>
-            )}
 
-            {/* TAB: USERS DIRECTORY */}
-            {tab === 'users' && (
-              <div className="bevel-field retro-scroll overflow-x-auto bg-win-white">
-                <table className="w-full text-left text-[12px]">
-                  <thead className="bevel-out bg-win-face text-[11px] font-bold text-win-text">
-                    <tr>
-                      <th className="px-2 py-2">User ID</th>
-                      <th className="px-2 py-2">Display Name</th>
-                      <th className="px-2 py-2">Email</th>
-                      <th className="px-2 py-2">Role</th>
-                      <th className="px-2 py-2">Status</th>
-                      <th className="px-2 py-2">Reports</th>
-                      <th className="px-2 py-2">Joined</th>
-                      <th className="px-2 py-2 text-right">Moderation</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-win-face-light font-mono-sys">
-                    {users.map((u) => (
-                      <tr key={u.id} className="hover:bg-win-title/10">
-                        <td className="px-2 py-2 font-bold text-win-title">#{u.id}</td>
-                        <td className="px-2 py-2 font-bold font-sans">{u.displayName}</td>
-                        <td className="px-2 py-2 text-win-shadow">{u.email}</td>
-                        <td className="px-2 py-2">
-                          <RetroBadge tone={u.role === 'ADMIN' ? 'red' : u.role === 'MODERATOR' ? 'blue' : 'neutral'}>
-                            {u.role}
-                          </RetroBadge>
-                        </td>
-                        <td className="px-2 py-2">
-                          <RetroBadge tone={u.status === 'ACTIVE' ? 'green' : u.status === 'FLAGGED' ? 'yellow' : 'red'}>
-                            {u.status}
-                          </RetroBadge>
-                        </td>
-                        <td className="px-2 py-2 text-center">{u.reports}</td>
-                        <td className="px-2 py-2 text-win-shadow">{u.joined}</td>
-                        <td className="px-2 py-2 text-right font-sans">
-                          <RetroButton
-                            onClick={() => handleToggleStatus(u.id)}
-                            className="px-2 py-0.5 text-[11px]"
-                          >
-                            {u.status === 'ACTIVE' ? 'Flag' : u.status === 'FLAGGED' ? 'Suspend' : 'Unsuspend'}
-                          </RetroButton>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="p-5 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl">
+                <span className="text-[10px] uppercase font-mono text-zinc-500 font-semibold">Recovered &amp; Closed</span>
+                <div className="text-3xl font-extrabold text-emerald-400 mt-1 font-['var(--font-heading)']">
+                  {ADMIN_METRICS.resolvedCases}
+                </div>
+                <p className="text-[11px] text-emerald-400/80 mt-1">98.4% Return Accuracy</p>
               </div>
-            )}
 
-            {/* TAB: ABUSE REPORTS */}
-            {tab === 'abuse' && (
-              <div className="bevel-field retro-scroll overflow-x-auto bg-win-white">
-                <table className="w-full text-left text-[12px]">
-                  <thead className="bevel-out bg-win-face text-[11px] font-bold text-win-text">
-                    <tr>
-                      <th className="px-2 py-2">Ticket</th>
-                      <th className="px-2 py-2">Reported Target</th>
-                      <th className="px-2 py-2">Reason</th>
-                      <th className="px-2 py-2">Reported By</th>
-                      <th className="px-2 py-2">Date</th>
-                      <th className="px-2 py-2">Status</th>
-                      <th className="px-2 py-2 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-win-face-light">
-                    {abuseReports.map((a) => (
-                      <tr key={a.id} className="hover:bg-win-title/10">
-                        <td className="font-mono-sys px-2 py-2 font-bold text-win-title">#{a.id}</td>
-                        <td className="px-2 py-2 font-bold">{a.target}</td>
-                        <td className="px-2 py-2 text-win-red font-medium">{a.reason}</td>
-                        <td className="px-2 py-2 text-win-shadow">{a.reportedBy}</td>
-                        <td className="px-2 py-2 text-win-shadow">{a.at}</td>
-                        <td className="px-2 py-2">
-                          <RetroBadge tone={a.status === 'OPEN' ? 'red' : a.status === 'REVIEWING' ? 'yellow' : 'green'}>
-                            {a.status}
-                          </RetroBadge>
-                        </td>
-                        <td className="px-2 py-2 text-right">
-                          {a.status !== 'RESOLVED' ? (
-                            <RetroButton
-                              onClick={() => handleResolveAbuse(a.id)}
-                              variant="primary"
-                              className="px-2 py-0.5 text-[11px]"
-                            >
-                              Resolve Ticket
-                            </RetroButton>
-                          ) : (
-                            <span className="text-[11px] text-win-shadow">Resolved</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="p-5 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl">
+                <span className="text-[10px] uppercase font-mono text-zinc-500 font-semibold">Pending Claims</span>
+                <div className="text-3xl font-extrabold text-amber-400 mt-1 font-['var(--font-heading)']">
+                  {ADMIN_METRICS.pendingClaims}
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1">Awaiting ownership review</p>
               </div>
-            )}
 
-            {/* TAB: SECURITY EVENTS */}
-            {tab === 'events' && (
-              <div className="bevel-field retro-scroll overflow-x-auto bg-win-white">
-                <table className="w-full text-left text-[12px]">
-                  <thead className="bevel-out bg-win-face text-[11px] font-bold text-win-text">
-                    <tr>
-                      <th className="px-2 py-2">Event ID</th>
-                      <th className="px-2 py-2">Security Description</th>
-                      <th className="px-2 py-2">Risk</th>
-                      <th className="px-2 py-2">Actor / User</th>
-                      <th className="px-2 py-2">Automated Action Taken</th>
-                      <th className="px-2 py-2">Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-win-face-light font-mono-sys">
-                    {events.map((e) => (
-                      <tr key={e.id} className="hover:bg-win-title/10">
-                        <td className="px-2 py-2 font-bold text-win-title">#{e.id}</td>
-                        <td className="px-2 py-2 font-sans font-bold">{e.event}</td>
-                        <td className="px-2 py-2">
-                          <RetroBadge tone={e.risk === 'HIGH' ? 'red' : e.risk === 'MEDIUM' ? 'yellow' : 'blue'}>
-                            {e.risk} RISK
-                          </RetroBadge>
-                        </td>
-                        <td className="px-2 py-2 text-win-shadow">{e.user}</td>
-                        <td className="px-2 py-2 font-sans text-win-green">{e.action}</td>
-                        <td className="px-2 py-2 text-win-shadow">{e.at}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="p-5 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl">
+                <span className="text-[10px] uppercase font-mono text-zinc-500 font-semibold">Security Guard</span>
+                <div className="text-3xl font-extrabold text-indigo-400 mt-1 font-['var(--font-heading)']">
+                  OPTIMAL
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  {ADMIN_METRICS.flaggedUsers} flagged • {ADMIN_METRICS.securityEvents} incidents
+                </p>
               </div>
-            )}
+            </div>
 
-            {/* Status bar */}
-            <RetroStatusBar
-              segments={[
-                <span key="role" className="font-mono-sys font-bold text-win-red">
-                  ADMIN STATION: ROOT ACCESS
-                </span>,
-                <RetroBadge key="sec" tone="green">
-                  AUDIT LOGGING ON
-                </RetroBadge>,
-              ]}
-            />
+            <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl flex flex-col gap-4">
+              <h3 className="text-sm font-bold text-white font-['var(--font-heading)']">
+                Automated Defense Guardrail Engines
+              </h3>
+
+              <div className="grid gap-3 sm:grid-cols-2 text-xs">
+                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="text-zinc-300">
+                    Row-Level Access Security: <strong className="text-white">ENFORCED</strong>
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="text-zinc-300">
+                    Rate Limiter: <strong className="text-white">10 REQ/MIN ACTIVE</strong>
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="text-zinc-300">
+                    Secret Verification Vault: <strong className="text-white">AES-256-GCM</strong>
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="text-zinc-300">
+                    MIME Image Security Filter: <strong className="text-white">ACTIVE</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-        </RetroWindow>
+        )}
+
+        {/* TAB: USERS DIRECTORY */}
+        {tab === 'users' && (
+          <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-white/10 text-[11px] font-mono uppercase text-zinc-500">
+                  <th className="pb-3">User ID</th>
+                  <th className="pb-3">Display Name</th>
+                  <th className="pb-3">Email</th>
+                  <th className="pb-3">Role</th>
+                  <th className="pb-3">Status</th>
+                  <th className="pb-3">Reports</th>
+                  <th className="pb-3">Joined</th>
+                  <th className="pb-3 text-right">Moderation</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {users.map((u) => (
+                  <tr key={u.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3.5 font-mono text-indigo-400 font-bold">#{u.id}</td>
+                    <td className="py-3.5 font-semibold text-white">{u.displayName}</td>
+                    <td className="py-3.5 text-zinc-500 font-mono text-[11px]">{u.email}</td>
+                    <td className="py-3.5">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-white/5 border border-white/10 text-zinc-300">
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="py-3.5">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          u.status === 'ACTIVE'
+                            ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                            : u.status === 'FLAGGED'
+                            ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                            : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                        }`}
+                      >
+                        {u.status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 text-zinc-400">{u.reports}</td>
+                    <td className="py-3.5 text-zinc-500">{u.joined}</td>
+                    <td className="py-3.5 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleStatus(u.id)}
+                        className="px-3 py-1 rounded-full text-[11px] font-semibold bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                      >
+                        {u.status === 'ACTIVE' ? 'Flag' : u.status === 'FLAGGED' ? 'Suspend' : 'Unsuspend'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* TAB: ABUSE REPORTS */}
+        {tab === 'abuse' && (
+          <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-white/10 text-[11px] font-mono uppercase text-zinc-500">
+                  <th className="pb-3">Ticket</th>
+                  <th className="pb-3">Target</th>
+                  <th className="pb-3">Reason</th>
+                  <th className="pb-3">Reported By</th>
+                  <th className="pb-3">Date</th>
+                  <th className="pb-3">Status</th>
+                  <th className="pb-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {abuseReports.map((a) => (
+                  <tr key={a.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3.5 font-mono text-indigo-400 font-bold">#{a.id}</td>
+                    <td className="py-3.5 font-semibold text-white">{a.target}</td>
+                    <td className="py-3.5 text-rose-400 font-medium">{a.reason}</td>
+                    <td className="py-3.5 text-zinc-400">{a.reportedBy}</td>
+                    <td className="py-3.5 text-zinc-500 font-mono text-[11px]">{a.at}</td>
+                    <td className="py-3.5">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          a.status === 'OPEN'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            : a.status === 'REVIEWING'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        }`}
+                      >
+                        {a.status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 text-right">
+                      {a.status !== 'RESOLVED' ? (
+                        <button
+                          type="button"
+                          onClick={() => handleResolveAbuse(a.id)}
+                          className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30 transition-colors"
+                        >
+                          Resolve
+                        </button>
+                      ) : (
+                        <span className="text-zinc-500 text-xs">Resolved</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* TAB: SECURITY EVENTS */}
+        {tab === 'events' && (
+          <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-white/10 text-[11px] font-mono uppercase text-zinc-500">
+                  <th className="pb-3">Event ID</th>
+                  <th className="pb-3">Description</th>
+                  <th className="pb-3">Risk Level</th>
+                  <th className="pb-3">Actor</th>
+                  <th className="pb-3">Defense Action</th>
+                  <th className="pb-3">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {events.map((e) => (
+                  <tr key={e.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3.5 font-mono text-indigo-400 font-bold">#{e.id}</td>
+                    <td className="py-3.5 font-semibold text-white">{e.event}</td>
+                    <td className="py-3.5">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          e.risk === 'HIGH'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            : e.risk === 'MEDIUM'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                        }`}
+                      >
+                        {e.risk} RISK
+                      </span>
+                    </td>
+                    <td className="py-3.5 text-zinc-400 font-mono text-[11px]">{e.user}</td>
+                    <td className="py-3.5 text-emerald-400 font-medium">{e.action}</td>
+                    <td className="py-3.5 text-zinc-500 font-mono text-[11px]">{e.at}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-    </DesktopShell>
+    </ModernShell>
   )
 }

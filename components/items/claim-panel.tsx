@@ -8,17 +8,9 @@ import {
   Lock,
   CheckCircle2,
   ArrowRight,
+  Sparkles,
+  X,
 } from 'lucide-react'
-import {
-  RetroWindow,
-  RetroButton,
-  RetroField,
-  RetroTextarea,
-  RetroBadge,
-  RetroProgressBar,
-  RetroDialog,
-  RetroNotification,
-} from '@/components/retro'
 import { VERIFICATION_QUESTIONS, type Item } from '@/lib/mock-data'
 
 type Stage = 'idle' | 'verify' | 'submitted'
@@ -36,134 +28,182 @@ export function ClaimPanel({ item }: { item: Item }) {
   const isOwnerAction = item.type === 'FOUND'
 
   return (
-    <div className="flex flex-col gap-3">
-      <RetroWindow
-        title={isOwnerAction ? 'Claim This Item' : 'Help Return This Item'}
-        icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden />}
-        controls={['minimize', 'close']}
-      >
+    <div className="flex flex-col gap-4">
+      {/* Main Claim / Contact Card */}
+      <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl">
+        <div className="flex items-center gap-2 pb-3 border-b border-white/10 text-xs font-mono text-indigo-400 uppercase tracking-wider">
+          <ShieldCheck className="h-4 w-4" />
+          <span>{isOwnerAction ? 'OWNERSHIP VERIFICATION' : 'RETURN COORDINATION'}</span>
+        </div>
+
         {stage === 'submitted' ? (
-          <div className="flex flex-col items-center gap-3 p-2 text-center">
-            <span className="bevel-out grid h-12 w-12 place-items-center bg-win-green text-win-white">
-              <CheckCircle2 className="h-7 w-7" aria-hidden />
-            </span>
-            <p className="font-pixel text-sm text-win-title">CLAIM SUBMITTED</p>
-            <p className="text-[13px] leading-relaxed text-win-shadow">
-              Your verification answers were sent to the finder for review. You&apos;ll get a secure
-              message if the claim is approved. Your contact details stay private until both sides
-              confirm.
+          <div className="flex flex-col items-center gap-3 py-6 text-center animate-in fade-in duration-300">
+            <div className="h-14 w-14 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+              <CheckCircle2 className="h-7 w-7" />
+            </div>
+            <h3 className="text-base font-bold text-white font-['var(--font-heading)']">
+              Verification Proof Submitted
+            </h3>
+            <p className="text-xs text-zinc-400 leading-relaxed max-w-sm">
+              Your secret ownership proof has been sent for encrypted comparison. You will receive an instant notification once campus security validates the details.
             </p>
-            <RetroBadge tone="yellow">STATUS: PENDING REVIEW</RetroBadge>
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 mt-2">
+              STATUS: PENDING REVIEW
+            </span>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            <div className="bevel-groove flex items-start gap-2 p-2 text-[12px] text-win-text">
-              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-win-title" aria-hidden />
-              <p>
-                Contact is anonymous. To {isOwnerAction ? 'claim' : 'coordinate'} this item you must
-                pass ownership verification. This protects both parties from fraud.
-              </p>
+          <div className="mt-4 flex flex-col gap-4">
+            <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-200/90 flex items-start gap-2.5">
+              <Lock className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+              <span>
+                Communications are anonymous and protected. Passing the ownership challenge unlocks security desk pickup without exposing phone numbers.
+              </span>
             </div>
 
             {stage === 'idle' ? (
-              <>
-                <RetroButton variant="primary" className="w-full gap-2" onClick={() => setStage('verify')}>
-                  <ShieldCheck className="h-4 w-4" aria-hidden />
-                  {isOwnerAction ? 'Start Ownership Claim' : 'Verify & Contact'}
-                </RetroButton>
-                <RetroButton className="w-full gap-2" onClick={() => setShowContact(true)}>
-                  <MessageSquare className="h-4 w-4" aria-hidden />
-                  Send a Message
-                </RetroButton>
-              </>
+              <div className="flex flex-col gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setStage('verify')}
+                  className="w-full py-3 rounded-full text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/10 active:scale-95"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>{isOwnerAction ? 'Start Ownership Verification' : 'Verify & Coordinate Return'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowContact(true)}
+                  className="w-full py-2.5 rounded-full text-xs font-medium bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Send Anonymous Message</span>
+                </button>
+              </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-4 animate-in fade-in duration-200">
                 <div>
-                  <div className="mb-1 flex items-center justify-between text-[12px] font-bold">
-                    <span>Verification</span>
-                    <span className="text-win-shadow">
-                      {answered}/{VERIFICATION_QUESTIONS.length}
+                  <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-zinc-300">
+                    <span>Verification Challenge</span>
+                    <span className="font-mono text-indigo-400">
+                      {answered}/{VERIFICATION_QUESTIONS.length} Answered
                     </span>
                   </div>
-                  <RetroProgressBar value={progress} />
+                  <div className="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
                 </div>
 
                 {VERIFICATION_QUESTIONS.map((q, i) => (
-                  <RetroField key={q.id} label={`${i + 1}. ${q.question}`} htmlFor={q.id} required>
-                    <RetroTextarea
+                  <div key={q.id} className="flex flex-col gap-1.5">
+                    <label htmlFor={q.id} className="text-xs font-semibold text-zinc-300">
+                      {i + 1}. {q.question} *
+                    </label>
+                    <textarea
                       id={q.id}
                       rows={2}
                       value={answers[q.id] ?? ''}
                       onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-                      placeholder="Be specific — only the true owner would know."
+                      placeholder="Provide specific details only the true owner would know..."
+                      className="w-full p-3 rounded-2xl text-xs bg-[#090a0f] border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
                     />
-                  </RetroField>
+                  </div>
                 ))}
 
-                <div className="flex gap-2">
-                  <RetroButton className="flex-1" onClick={() => setStage('idle')}>
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStage('idle')}
+                    className="flex-1 py-2.5 rounded-full text-xs font-medium text-zinc-400 hover:text-white border border-white/10 hover:bg-white/5 transition-colors"
+                  >
                     Cancel
-                  </RetroButton>
-                  <RetroButton
-                    variant="primary"
-                    className="flex-1 gap-2"
+                  </button>
+                  <button
+                    type="button"
                     disabled={!canSubmit}
                     onClick={() => setStage('submitted')}
+                    className="flex-1 py-2.5 rounded-full text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 disabled:opacity-50 disabled:pointer-events-none transition-all duration-200 flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20"
                   >
-                    Submit
-                    <ArrowRight className="h-4 w-4" aria-hidden />
-                  </RetroButton>
+                    <span>Submit Proof</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             )}
           </div>
         )}
-      </RetroWindow>
+      </div>
 
-      <RetroWindow title="Report a Problem" controls={['close']}>
+      {/* Flag suspicious card */}
+      <div className="p-4 rounded-2xl bg-[#12131d]/60 border border-white/10 backdrop-blur-xl flex items-center justify-between text-xs">
         {flagged ? (
-          <p className="flex items-center gap-2 p-1 text-[13px] text-win-green">
-            <CheckCircle2 className="h-4 w-4" aria-hidden />
-            Thanks — our moderators will review this listing.
+          <p className="flex items-center gap-2 text-emerald-400 font-medium">
+            <CheckCircle2 className="h-4 w-4" />
+            Report received — moderators will review.
           </p>
         ) : (
-          <RetroButton className="w-full gap-2" onClick={() => setFlagged(true)}>
-            <Flag className="h-4 w-4" aria-hidden />
-            Flag as Suspicious
-          </RetroButton>
+          <button
+            type="button"
+            onClick={() => setFlagged(true)}
+            className="w-full py-2 rounded-xl text-zinc-400 hover:text-rose-300 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all flex items-center justify-center gap-2"
+          >
+            <Flag className="h-3.5 w-3.5" />
+            <span>Flag listing as suspicious</span>
+          </button>
         )}
-      </RetroWindow>
+      </div>
 
-      <RetroDialog
-        open={showContact}
-        title="Send Secure Message"
-        onClose={() => setShowContact(false)}
-        icon={<MessageSquare className="h-3.5 w-3.5" aria-hidden />}
-      >
-          <div className="flex flex-col gap-3">
-            <p className="text-[13px] text-win-text">
-              Messages are relayed anonymously. Never share passwords or full personal details.
+      {/* Anonymous message modal */}
+      {showContact && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl bg-[#12131d] border border-white/15 p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setShowContact(false)}
+              aria-label="Close message dialog"
+              className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-wider mb-1">
+              <MessageSquare className="h-3.5 w-3.5" />
+              <span>MASKED MESSAGE RELAY</span>
+            </div>
+            <h3 className="text-base font-bold text-white">Send Anonymous Message</h3>
+            <p className="text-xs text-zinc-400 mt-1">
+              Never share passwords, bank information, or personal private addresses.
             </p>
-            <RetroField label="Your message" htmlFor="msg">
-              <RetroTextarea id="msg" rows={4} placeholder="Hi, I think this may be mine..." />
-            </RetroField>
-            <div className="flex justify-end gap-2">
-              <RetroButton onClick={() => setShowContact(false)}>Cancel</RetroButton>
-              <RetroButton variant="primary" onClick={() => setShowContact(false)}>
-                Send
-              </RetroButton>
+
+            <div className="mt-4">
+              <textarea
+                rows={4}
+                placeholder="Hi, I believe this item might be mine. I lost it around the same time..."
+                className="w-full p-3.5 rounded-2xl text-xs bg-[#090a0f] border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
+              />
+            </div>
+
+            <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setShowContact(false)}
+                className="px-4 py-2 rounded-full text-xs font-medium text-zinc-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowContact(false)}
+                className="px-5 py-2 rounded-full text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200 transition-colors"
+              >
+                Send Message
+              </button>
             </div>
           </div>
-        </RetroDialog>
-
-      {stage === 'submitted' ? (
-        <RetroNotification
-          title="VERIFICATION SENT"
-          icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden />}
-        >
-          Claim <span className="font-bold">#{item.id}</span> is now pending finder review.
-        </RetroNotification>
-      ) : null}
+        </div>
+      )}
     </div>
   )
 }

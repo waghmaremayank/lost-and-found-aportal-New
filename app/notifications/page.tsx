@@ -9,19 +9,10 @@ import {
   ShieldCheck,
   CheckCircle2,
   Trash2,
-  CheckSquare,
-  AlertCircle,
   Clock,
+  ArrowRight,
 } from 'lucide-react'
-import { DesktopShell } from '@/components/shell/desktop-shell'
-import {
-  RetroWindow,
-  RetroButton,
-  RetroBadge,
-  RetroStatusBar,
-  RetroTabs,
-  RetroGroupBox,
-} from '@/components/retro'
+import { ModernShell } from '@/components/shell/modern-shell'
 import { NOTIFICATIONS, type Notification } from '@/lib/mock-data'
 
 export default function NotificationsPage() {
@@ -42,140 +33,136 @@ export default function NotificationsPage() {
   }
 
   return (
-    <DesktopShell activeKey="notifications">
-      <div className="flex flex-col gap-3">
-        <RetroWindow
-          title="LOST//98 Notification Subsystem"
-          icon={<Bell className="h-3.5 w-3.5" aria-hidden />}
-          controls={['minimize', 'maximize', 'close']}
-        >
-          <div className="flex flex-col gap-4">
-            {/* Top Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <RetroTabs
-                tabs={[
-                  { key: 'ALL', label: `All (${notifications.length})` },
-                  {
-                    key: 'MATCH',
-                    label: `Matches (${notifications.filter((n) => n.type === 'MATCH').length})`,
-                  },
-                  {
-                    key: 'MESSAGE',
-                    label: `Messages (${notifications.filter((n) => n.type === 'MESSAGE').length})`,
-                  },
-                  {
-                    key: 'SECURITY',
-                    label: `Security (${notifications.filter((n) => n.type === 'SECURITY').length})`,
-                  },
-                ]}
-                active={filter}
-                onChange={(k) => setFilter(k as typeof filter)}
-              />
+    <ModernShell
+      activeKey="notifications"
+      title="Alerts &amp; Notifications"
+      subtitle="Live feed for AI similarity matches, safe messages, and security verifications."
+      badge="LIVE STREAM"
+      action={
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={markAllRead}
+            className="px-4 py-2 rounded-full text-xs font-medium bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Mark all read
+          </button>
+          <button
+            type="button"
+            onClick={clearAll}
+            className="px-4 py-2 rounded-full text-xs font-medium bg-white/5 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-300 border border-white/10 transition-colors flex items-center gap-1.5"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Clear
+          </button>
+        </div>
+      }
+    >
+      <div className="max-w-4xl mx-auto flex flex-col gap-6">
+        {/* Category Filters */}
+        <div className="flex items-center gap-1 p-1 rounded-2xl bg-[#12131d] border border-white/10 overflow-x-auto scrollbar-none">
+          {[
+            { key: 'ALL', label: `All Alerts (${notifications.length})` },
+            {
+              key: 'MATCH',
+              label: `Matches (${notifications.filter((n) => n.type === 'MATCH').length})`,
+            },
+            {
+              key: 'MESSAGE',
+              label: `Messages (${notifications.filter((n) => n.type === 'MESSAGE').length})`,
+            },
+            {
+              key: 'SECURITY',
+              label: `Security (${notifications.filter((n) => n.type === 'SECURITY').length})`,
+            },
+          ].map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setFilter(t.key as typeof filter)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                filter === t.key
+                  ? 'bg-white text-zinc-950 shadow-md'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-              <div className="flex items-center gap-2">
-                <RetroButton onClick={markAllRead} className="gap-1 text-[12px]">
-                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                  Mark All Read
-                </RetroButton>
-                <RetroButton onClick={clearAll} className="gap-1 text-[12px]">
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                  Clear Log
-                </RetroButton>
-              </div>
-            </div>
-
-            {/* Notification Stream */}
-            {filtered.length === 0 ? (
-              <div className="bevel-in bg-win-white flex flex-col items-center justify-center gap-2 p-10 text-center">
-                <Bell className="h-8 w-8 text-win-shadow" aria-hidden />
-                <p className="font-pixel text-sm text-win-title">NO ACTIVE NOTIFICATIONS</p>
-                <p className="text-[12px] text-win-shadow">
-                  Your event stream is up to date. You will be alerted when matches or claims arrive.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {filtered.map((n) => {
-                  let Icon = Bell
-                  let tone: 'yellow' | 'blue' | 'green' | 'neutral' = 'neutral'
-                  let actionHref = '/search'
-
-                  if (n.type === 'MATCH') {
-                    Icon = Sparkles
-                    tone = 'yellow'
-                    actionHref = '/search/L98-2049'
-                  } else if (n.type === 'MESSAGE') {
-                    Icon = MessageSquare
-                    tone = 'blue'
-                    actionHref = '/messages'
-                  } else if (n.type === 'SECURITY') {
-                    Icon = ShieldCheck
-                    tone = 'green'
-                    actionHref = '/security'
-                  }
-
-                  return (
-                    <div
-                      key={n.id}
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 transition-colors ${
-                        !n.read ? 'bevel-out bg-win-face font-semibold' : 'bevel-groove bg-win-white'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`bevel-out grid h-8 w-8 shrink-0 place-items-center ${
-                            tone === 'yellow'
-                              ? 'bg-win-yellow text-win-title'
-                              : tone === 'green'
-                              ? 'bg-win-green text-win-white'
-                              : 'bg-win-title text-win-white'
-                          }`}
-                        >
-                          <Icon className="h-4 w-4" aria-hidden />
-                        </div>
-
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[13px] font-bold text-win-text">{n.title}</span>
-                            {!n.read && (
-                              <RetroBadge tone="yellow" className="text-[9px]">
-                                NEW
-                              </RetroBadge>
-                            )}
-                          </div>
-                          <p className="text-[12px] text-win-shadow leading-relaxed">{n.message}</p>
-                          <span className="font-mono-sys text-[10px] text-win-disabled">{n.at}</span>
-                        </div>
-                      </div>
-
-                      <div className="shrink-0 self-end sm:self-center">
-                        <Link href={actionHref}>
-                          <RetroButton variant="primary" className="text-[12px]">
-                            Open Item
-                          </RetroButton>
-                        </Link>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Status bar */}
-            <RetroStatusBar
-              segments={[
-                <span key="cnt" className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" aria-hidden />
-                  {filtered.length} alert{filtered.length === 1 ? '' : 's'} registered
-                </span>,
-                <RetroBadge key="sec" tone="green">
-                  LISTENER ONLINE
-                </RetroBadge>,
-              ]}
-            />
+        {/* Notification Stream */}
+        {filtered.length === 0 ? (
+          <div className="p-12 text-center rounded-3xl bg-[#12131d]/50 border border-white/10 backdrop-blur-xl">
+            <Bell className="h-10 w-10 text-zinc-600 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-white">No active notifications</h3>
+            <p className="text-xs text-zinc-400 mt-1">You are all caught up on matches and messages.</p>
           </div>
-        </RetroWindow>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {filtered.map((n) => {
+              let Icon = Bell
+              let colorClass = 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
+              let actionHref = '/search'
+
+              if (n.type === 'MATCH') {
+                Icon = Sparkles
+                colorClass = 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                actionHref = '/search/L98-2049'
+              } else if (n.type === 'MESSAGE') {
+                Icon = MessageSquare
+                colorClass = 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
+                actionHref = '/messages'
+              } else if (n.type === 'SECURITY') {
+                Icon = ShieldCheck
+                colorClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                actionHref = '/security'
+              }
+
+              return (
+                <div
+                  key={n.id}
+                  className={`p-4 sm:p-5 rounded-3xl border transition-all duration-200 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                    !n.read
+                      ? 'bg-[#12131d]/90 border-indigo-500/40 shadow-lg shadow-indigo-500/5'
+                      : 'bg-[#12131d]/50 border-white/5 opacity-80'
+                  }`}
+                >
+                  <div className="flex items-start gap-3.5">
+                    <div
+                      className={`h-10 w-10 rounded-2xl border flex items-center justify-center shrink-0 ${colorClass}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs sm:text-sm font-bold text-white">{n.title}</h4>
+                        {!n.read && (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            NEW
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-300 mt-1 leading-relaxed">{n.message}</p>
+                      <span className="text-[10px] font-mono text-zinc-500 mt-1 block">{n.at}</span>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={actionHref}
+                    className="px-4 py-2 rounded-full text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200 shrink-0 self-end sm:self-center transition-colors flex items-center gap-1 shadow-sm"
+                  >
+                    <span>Inspect</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
-    </DesktopShell>
+    </ModernShell>
   )
 }

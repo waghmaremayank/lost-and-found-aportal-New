@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import {
   ArrowLeft,
@@ -10,15 +11,9 @@ import {
   ShieldCheck,
   Sparkles,
   Camera,
+  Layers,
 } from 'lucide-react'
-import { DesktopShell } from '@/components/shell/desktop-shell'
-import {
-  RetroWindow,
-  RetroButton,
-  RetroBadge,
-  RetroGroupBox,
-  RetroStatusBar,
-} from '@/components/retro'
+import { ModernShell } from '@/components/shell/modern-shell'
 import { ItemCard, ItemStatusBadge } from '@/components/items/item-card'
 import { ClaimPanel } from '@/components/items/claim-panel'
 import { ITEMS } from '@/lib/mock-data'
@@ -41,124 +36,138 @@ export default async function ItemDetailPage({
   ).slice(0, 3)
 
   return (
-    <DesktopShell activeKey="search">
-      <div className="flex flex-col gap-3">
-        <Link href="/search" className="inline-flex w-fit">
-          <RetroButton className="gap-2">
-            <ArrowLeft className="h-4 w-4" aria-hidden />
-            Back to Results
-          </RetroButton>
+    <ModernShell
+      activeKey="search"
+      title={item.title}
+      subtitle={`Verified ${item.type.toLowerCase()} property record registered on campus.`}
+      badge={`#${item.id}`}
+      action={
+        <Link
+          href="/search"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Back to Catalog</span>
         </Link>
-
-        <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-          <RetroWindow
-            title={`${item.title} — Report #${item.id}`}
-            icon={<Tag className="h-3.5 w-3.5" aria-hidden />}
-            controls={['minimize', 'maximize', 'close']}
-          >
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <RetroBadge tone={item.type === 'LOST' ? 'red' : 'green'}>{item.type}</RetroBadge>
+      }
+    >
+      <div className="flex flex-col gap-8">
+        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+          {/* Left Column: Item Gallery & Full Specs */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col gap-6">
+            {/* Top Badges */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border ${
+                    item.type === 'LOST'
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  }`}
+                >
+                  {item.type}
+                </span>
                 <ItemStatusBadge status={item.status} />
-                <span className="font-mono-sys ml-auto text-[12px] text-win-shadow">#{item.id}</span>
               </div>
 
-              {/* Photo Preview Container */}
-              <div className="bevel-in bg-win-dark relative overflow-hidden rounded-none h-64 flex items-center justify-center">
-                {item.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="h-full w-full object-cover object-center"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-win-face">
-                    <Camera className="h-10 w-10 text-win-shadow" aria-hidden />
-                    <span className="font-pixel text-sm">[ IMAGE WITHHELD ]</span>
-                  </div>
-                )}
-                <div className="absolute top-2 left-2 bevel-out bg-win-face/90 px-2 py-1 text-[11px] font-bold text-win-title backdrop-blur-sm">
-                  {item.type === 'LOST' ? 'LOST PROPERTY PHOTO' : 'FOUND EVIDENCE PHOTO'}
-                </div>
-              </div>
-
-              {item.matchConfidence ? (
-                <div className="bevel-out bg-win-yellow flex items-center gap-2 p-2 text-[13px] font-bold text-win-text">
-                  <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
-                  Smart match: {item.matchConfidence}% confidence with {item.possibleMatches} report
-                  {item.possibleMatches === 1 ? '' : 's'}.
-                </div>
-              ) : null}
-
-              <RetroGroupBox legend="Item Details">
-                <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <Detail icon={Tag} label="Category" value={item.category} />
-                  <Detail icon={Palette} label="Color" value={item.color} />
-                  <Detail icon={MapPin} label="General Area" value={item.generalLocation} />
-                  <Detail icon={Calendar} label="Date" value={item.dateOccurred} />
-                  {item.brand ? <Detail icon={Tag} label="Brand" value={item.brand} /> : null}
-                  <Detail icon={User} label="Reporter" value={item.reporter} />
-                </dl>
-              </RetroGroupBox>
-
-              <RetroGroupBox legend="Description">
-                <p className="text-[13px] leading-relaxed text-win-text">{item.description}</p>
-                <p className="mt-2 text-[11px] text-win-shadow">
-                  Note: sensitive identifying details (serial numbers, interior contents) are hidden and confirmed only during verified ownership claims.
-                </p>
-              </RetroGroupBox>
-
-              <RetroStatusBar
-                segments={[
-                  <span key="loc" className="flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5" aria-hidden />
-                    {item.generalLocation}
-                  </span>,
-                  <span key="sec" className="flex items-center gap-1">
-                    <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-                    Protected by LOST//98 System
-                  </span>,
-                ]}
-              />
+              <span className="font-mono text-xs text-zinc-500">
+                Reporter: <span className="text-zinc-300">{item.reporter}</span>
+              </span>
             </div>
-          </RetroWindow>
 
+            {/* Photo Preview */}
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-zinc-900 border border-white/10">
+              {item.imageUrl ? (
+                <Image
+                  src={item.imageUrl}
+                  alt={item.title}
+                  fill
+                  priority
+                  className="object-cover"
+                />
+              ) : (
+                <div className="h-full w-full flex flex-col items-center justify-center gap-2 text-zinc-500">
+                  <Camera className="h-10 w-10 text-zinc-600" />
+                  <span className="text-xs font-mono uppercase">[ IMAGE WITHHELD ]</span>
+                </div>
+              )}
+            </div>
+
+            {/* Smart Match Banner */}
+            {item.matchConfidence ? (
+              <div className="p-4 rounded-2xl bg-indigo-950/50 border border-indigo-500/40 text-xs text-indigo-200 flex items-center justify-between">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Sparkles className="h-4 w-4 text-indigo-400" />
+                  <span>AI Proximity Match Detected</span>
+                </div>
+                <span className="font-mono text-emerald-400 font-bold text-sm">
+                  {item.matchConfidence}% Confidence
+                </span>
+              </div>
+            ) : null}
+
+            {/* Specs Grid */}
+            <div>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold mb-3">
+                PROPERTY SPECIFICATIONS
+              </h3>
+              <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <dt className="text-[10px] font-mono uppercase text-zinc-500">Category</dt>
+                  <dd className="text-xs font-bold text-white mt-1">{item.category}</dd>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <dt className="text-[10px] font-mono uppercase text-zinc-500">Primary Color</dt>
+                  <dd className="text-xs font-bold text-white mt-1">{item.color}</dd>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <dt className="text-[10px] font-mono uppercase text-zinc-500">Campus Location</dt>
+                  <dd className="text-xs font-bold text-white mt-1 truncate">{item.generalLocation}</dd>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <dt className="text-[10px] font-mono uppercase text-zinc-500">Date Occurred</dt>
+                  <dd className="text-xs font-bold text-white mt-1">{item.dateOccurred}</dd>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <dt className="text-[10px] font-mono uppercase text-zinc-500">Brand / Maker</dt>
+                  <dd className="text-xs font-bold text-white mt-1">{item.brand || 'Unbranded'}</dd>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <dt className="text-[10px] font-mono uppercase text-zinc-500">Recovery State</dt>
+                  <dd className="text-xs font-bold text-indigo-300 mt-1">{item.status}</dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* Description */}
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+              <h4 className="text-xs font-semibold text-zinc-300 mb-1.5">Public Narrative</h4>
+              <p className="text-xs text-zinc-400 leading-relaxed">{item.description}</p>
+              <p className="mt-3 text-[11px] text-zinc-500 flex items-center gap-1.5 border-t border-white/5 pt-2.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+                <span>Confidential serial numbers &amp; internal secrets are protected by zero-knowledge encryption.</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Right Column: Ownership Verification & Claim Widget */}
           <ClaimPanel item={item} />
         </div>
 
-        {related.length > 0 ? (
-          <RetroWindow
-            title="Related Reports in this Category"
-            icon={<Sparkles className="h-3.5 w-3.5" aria-hidden />}
-            controls={['minimize', 'close']}
-          >
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Related Items */}
+        {related.length > 0 && (
+          <div className="pt-6 border-t border-white/10">
+            <h3 className="text-lg font-bold text-white mb-4 font-['var(--font-heading)']">
+              Similar Items in {item.category}
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((r) => (
                 <ItemCard key={r.id} item={r} />
               ))}
             </div>
-          </RetroWindow>
-        ) : null}
+          </div>
+        )}
       </div>
-    </DesktopShell>
-  )
-}
-
-function Detail({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Tag
-  label: string
-  value: string
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 shrink-0 text-win-title" aria-hidden />
-      <dt className="text-[12px] text-win-shadow">{label}:</dt>
-      <dd className="text-[13px] font-bold text-win-text">{value}</dd>
-    </div>
+    </ModernShell>
   )
 }

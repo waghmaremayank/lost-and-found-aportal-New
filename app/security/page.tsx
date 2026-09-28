@@ -15,19 +15,10 @@ import {
   Lock,
   LogOut,
   History,
+  X,
+  QrCode,
 } from 'lucide-react'
-import { DesktopShell } from '@/components/shell/desktop-shell'
-import {
-  RetroWindow,
-  RetroButton,
-  RetroBadge,
-  RetroGroupBox,
-  RetroStatusBar,
-  RetroInput,
-  RetroField,
-  RetroDialog,
-  RetroProgressBar,
-} from '@/components/retro'
+import { ModernShell } from '@/components/shell/modern-shell'
 import { SESSIONS, SECURITY_LOG, type SecuritySession, type SecurityLogEntry } from '@/lib/mock-data'
 
 export default function SecurityCenterPage() {
@@ -72,289 +63,316 @@ export default function SecurityCenterPage() {
   }
 
   return (
-    <DesktopShell activeKey="security">
-      <div className="flex flex-col gap-3">
+    <ModernShell
+      activeKey="security"
+      title="Security &amp; Encryption Center"
+      subtitle="Manage two-factor authentication, active device sessions, and audit trail records."
+      badge="ZERO-TRUST ENCLAVE"
+    >
+      <div className="flex flex-col gap-6">
         {/* Toast */}
         {toast && (
-          <div className="bevel-out bg-win-yellow flex items-center justify-between p-2.5 text-[13px] font-bold text-win-text">
+          <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center justify-between backdrop-blur-xl animate-in fade-in">
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-win-green" aria-hidden />
+              <CheckCircle2 className="h-4 w-4" />
               {toast}
             </span>
             <button
               type="button"
               onClick={() => setToast(null)}
-              className="text-[11px] font-bold text-win-shadow hover:text-win-dark"
+              className="text-zinc-400 hover:text-white"
             >
               ✕
             </button>
           </div>
         )}
 
-        {/* Change Password Dialog */}
-        <RetroDialog
-          open={passwordModalOpen}
-          onClose={() => setPasswordModalOpen(false)}
-          title="CHANGE ACCOUNT PASSWORD"
-          icon={<KeyRound className="h-4 w-4 text-win-title" aria-hidden />}
-          className="max-w-md"
-        >
-          <form onSubmit={handleChangePassword} className="flex flex-col gap-3">
-            <RetroField label="Current Password" htmlFor="curr-pw" required>
-              <RetroInput
-                id="curr-pw"
-                type="password"
-                value={currentPw}
-                onChange={(e) => setCurrentPw(e.target.value)}
-                placeholder="••••••••••••"
-                required
-              />
-            </RetroField>
+        {/* Change Password Modal */}
+        {passwordModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md rounded-3xl bg-[#12131d] border border-white/15 p-6 shadow-2xl">
+              <button
+                type="button"
+                onClick={() => setPasswordModalOpen(false)}
+                aria-label="Close password modal"
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
 
-            <RetroField label="New Secure Password" htmlFor="new-pw" required>
-              <RetroInput
-                id="new-pw"
-                type="password"
-                value={newPw}
-                onChange={(e) => setNewPw(e.target.value)}
-                placeholder="Minimum 10 characters"
-                required
-              />
-            </RetroField>
+              <h3 className="text-base font-bold text-white">Update Account Password</h3>
+              <p className="text-xs text-zinc-400 mt-1">
+                Enter your current and new credentials to update your encrypted hash.
+              </p>
 
-            <div className="bevel-field bg-win-face-light p-2 text-[11px] text-win-shadow">
-              Password requirements: Mix of uppercase, lowercase, numbers, and special symbols.
+              <form onSubmit={handleChangePassword} className="mt-4 flex flex-col gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-1">Current Password *</label>
+                  <input
+                    type="password"
+                    required
+                    value={currentPw}
+                    onChange={(e) => setCurrentPw(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full px-3.5 py-2.5 rounded-2xl text-xs bg-[#090a0f] border border-white/10 text-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-1">New Secure Password *</label>
+                  <input
+                    type="password"
+                    required
+                    value={newPw}
+                    onChange={(e) => setNewPw(e.target.value)}
+                    placeholder="Min 10 characters"
+                    className="w-full px-3.5 py-2.5 rounded-2xl text-xs bg-[#090a0f] border border-white/10 text-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div className="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setPasswordModalOpen(false)}
+                    className="px-4 py-2 rounded-full text-xs font-medium text-zinc-400 hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-full text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200 transition-colors"
+                  >
+                    Update Password
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <RetroButton type="submit" variant="primary">
-                Update Password
-              </RetroButton>
-              <RetroButton type="button" onClick={() => setPasswordModalOpen(false)}>
-                Cancel
-              </RetroButton>
-            </div>
-          </form>
-        </RetroDialog>
+          </div>
+        )}
 
         {/* 2FA Setup Modal */}
-        <RetroDialog
-          open={twoFactorModalOpen}
-          onClose={() => setTwoFactorModalOpen(false)}
-          title="TWO-FACTOR AUTHENTICATION CONFIGURATION"
-          icon={<Smartphone className="h-4 w-4 text-win-title" aria-hidden />}
-          className="max-w-md"
-        >
-          <div className="flex flex-col gap-3 text-[12px]">
-            <p>
-              Two-Factor Authentication adds an extra layer of defense against account takeover.
-            </p>
-            <div className="bevel-in bg-win-white flex flex-col items-center gap-2 p-3 text-center">
-              <div className="bevel-out grid h-24 w-24 place-items-center bg-win-face font-mono-sys text-[11px] font-bold">
-                [ 2FA QR CODE ]
-              </div>
-              <p className="font-mono-sys text-[11px] font-bold text-win-title">KEY: LOST98-AUTH-SEC-2048</p>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <RetroButton
-                variant="primary"
-                onClick={() => {
-                  setTwoFactorEnabled(true)
-                  setTwoFactorModalOpen(false)
-                  setToast('2FA Authenticator enabled.')
-                  setTimeout(() => setToast(null), 3500)
-                }}
+        {twoFactorModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md rounded-3xl bg-[#12131d] border border-white/15 p-6 shadow-2xl text-center">
+              <button
+                type="button"
+                onClick={() => setTwoFactorModalOpen(false)}
+                aria-label="Close 2FA modal"
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
               >
-                Confirm Setup
-              </RetroButton>
-              <RetroButton onClick={() => setTwoFactorModalOpen(false)}>Close</RetroButton>
+                <X className="h-4 w-4" />
+              </button>
+
+              <h3 className="text-base font-bold text-white">Configure Authenticator App</h3>
+              <p className="text-xs text-zinc-400 mt-1">
+                Scan this QR code in Google Authenticator or 1Password.
+              </p>
+
+              <div className="my-5 p-6 rounded-2xl bg-white w-36 h-36 mx-auto flex items-center justify-center text-zinc-950">
+                <QrCode className="h-28 w-28" />
+              </div>
+
+              <span className="font-mono text-xs text-indigo-300 block bg-white/5 p-2 rounded-xl border border-white/10">
+                KEY: LOST-AUTH-CAMPUS-2048
+              </span>
+
+              <div className="mt-6 flex justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTwoFactorEnabled(true)
+                    setTwoFactorModalOpen(false)
+                    setToast('2FA Authenticator activated.')
+                    setTimeout(() => setToast(null), 3500)
+                  }}
+                  className="px-6 py-2 rounded-full text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition-colors"
+                >
+                  Confirm &amp; Enable 2FA
+                </button>
+              </div>
             </div>
           </div>
-        </RetroDialog>
+        )}
 
-        <RetroWindow
-          title="LOST//98 Cybersecurity Center"
-          icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden />}
-          controls={['minimize', 'maximize', 'close']}
-        >
-          <div className="flex flex-col gap-4">
-            {/* Account Status Grid */}
-            <RetroGroupBox legend="Account Security Posture">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="bevel-in bg-win-white flex items-center gap-2.5 p-2">
-                  <CheckCircle2 className="h-5 w-5 text-win-green shrink-0" aria-hidden />
-                  <div>
-                    <p className="text-[12px] font-bold">Email Verified</p>
-                    <p className="text-[10px] text-win-shadow">a***@mail.com</p>
-                  </div>
-                </div>
+        {/* Posture Overview */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col gap-6">
+          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+              <span className="font-bold text-white uppercase">SECURITY POSTURE RATING: 100/100</span>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              OPTIMAL DEFENSE
+            </span>
+          </div>
 
-                <div className="bevel-in bg-win-white flex items-center gap-2.5 p-2">
-                  <CheckCircle2 className="h-5 w-5 text-win-green shrink-0" aria-hidden />
-                  <div>
-                    <p className="text-[12px] font-bold">Strong Password</p>
-                    <p className="text-[10px] text-win-shadow">Changed 1 day ago</p>
-                  </div>
-                </div>
-
-                <div className="bevel-in bg-win-white flex items-center gap-2.5 p-2">
-                  <CheckCircle2 className="h-5 w-5 text-win-green shrink-0" aria-hidden />
-                  <div>
-                    <p className="text-[12px] font-bold">Active Sessions</p>
-                    <p className="text-[10px] text-win-shadow">{sessions.length} authorized</p>
-                  </div>
-                </div>
-
-                <div className="bevel-in bg-win-white flex items-center gap-2.5 p-2">
-                  {twoFactorEnabled ? (
-                    <CheckCircle2 className="h-5 w-5 text-win-green shrink-0" aria-hidden />
-                  ) : (
-                    <AlertTriangle className="h-5 w-5 text-win-red shrink-0" aria-hidden />
-                  )}
-                  <div>
-                    <p className="text-[12px] font-bold">2FA Protection</p>
-                    <p className="text-[10px] text-win-shadow">
-                      {twoFactorEnabled ? 'Enabled (TOTP)' : 'Disabled'}
-                    </p>
-                  </div>
-                </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-white block">Email Verified</span>
+                <span className="text-[11px] text-zinc-500 font-mono">a***@mail.com</span>
               </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <RetroButton onClick={() => setPasswordModalOpen(true)} className="gap-1.5 text-[12px]">
-                  <KeyRound className="h-3.5 w-3.5" aria-hidden />
-                  Change Password
-                </RetroButton>
-
-                <RetroButton
-                  onClick={() => {
-                    if (twoFactorEnabled) {
-                      setTwoFactorEnabled(false)
-                      setToast('2FA has been disabled.')
-                      setTimeout(() => setToast(null), 3000)
-                    } else {
-                      setTwoFactorModalOpen(true)
-                    }
-                  }}
-                  className="gap-1.5 text-[12px]"
-                >
-                  <Smartphone className="h-3.5 w-3.5" aria-hidden />
-                  {twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
-                </RetroButton>
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-white block">Strong Password</span>
+                <span className="text-[11px] text-zinc-500">Updated 1 day ago</span>
               </div>
-            </RetroGroupBox>
+            </div>
 
-            {/* Active Sessions Manager */}
-            <RetroGroupBox legend="Active Sessions & Devices">
-              <div className="flex flex-col gap-2">
-                {sessions.map((s) => (
-                  <div
-                    key={s.id}
-                    className="bevel-out bg-win-face flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="bevel-in grid h-7 w-7 place-items-center bg-win-white text-win-title">
-                        {s.device.includes('iPhone') ? (
-                          <Smartphone className="h-4 w-4" aria-hidden />
-                        ) : (
-                          <Laptop className="h-4 w-4" aria-hidden />
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 text-[12px] font-bold">
-                          <span>{s.device}</span>
-                          {s.current && (
-                            <RetroBadge tone="green" className="text-[9px]">
-                              CURRENT SESSION
-                            </RetroBadge>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-win-shadow">
-                          {s.location} • Last active: {s.lastActive}
-                        </p>
-                      </div>
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-white block">Active Devices</span>
+                <span className="text-[11px] text-zinc-500">{sessions.length} authorized</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-3">
+              {twoFactorEnabled ? (
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+              ) : (
+                <AlertTriangle className="h-5 w-5 text-rose-400 shrink-0" />
+              )}
+              <div>
+                <span className="text-xs font-bold text-white block">2FA Status</span>
+                <span className="text-[11px] text-zinc-500">{twoFactorEnabled ? 'Active (TOTP)' : 'Disabled'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setPasswordModalOpen(true)}
+              className="px-4 py-2 rounded-full text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200 transition-colors flex items-center gap-1.5"
+            >
+              <KeyRound className="h-3.5 w-3.5" />
+              Change Password
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (twoFactorEnabled) {
+                  setTwoFactorEnabled(false)
+                  setToast('2FA has been disabled.')
+                  setTimeout(() => setToast(null), 3000)
+                } else {
+                  setTwoFactorModalOpen(true)
+                }
+              }}
+              className="px-4 py-2 rounded-full text-xs font-medium bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5"
+            >
+              <Smartphone className="h-3.5 w-3.5" />
+              {twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+            </button>
+          </div>
+        </div>
+
+        {/* Active Sessions */}
+        <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col gap-4">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <h3 className="text-sm font-bold text-white font-['var(--font-heading)']">
+              Authorized Devices &amp; Sessions
+            </h3>
+            {sessions.length > 1 && (
+              <button
+                type="button"
+                onClick={handleLogoutAllOther}
+                className="text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors"
+              >
+                Log Out All Other Devices
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            {sessions.map((s) => (
+              <div
+                key={s.id}
+                className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-indigo-400 shrink-0">
+                    {s.device.includes('iPhone') ? <Smartphone className="h-4 w-4" /> : <Laptop className="h-4 w-4" />}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white">{s.device}</span>
+                      {s.current && (
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          CURRENT DEVICE
+                        </span>
+                      )}
                     </div>
-
-                    {!s.current && (
-                      <RetroButton
-                        onClick={() => handleKillSession(s.id)}
-                        className="self-end sm:self-center text-[11px] text-win-red"
-                      >
-                        Terminate
-                      </RetroButton>
-                    )}
+                    <span className="text-[11px] text-zinc-400 block mt-0.5">
+                      {s.location} • {s.lastActive}
+                    </span>
                   </div>
-                ))}
+                </div>
 
-                {sessions.length > 1 && (
-                  <div className="flex justify-end pt-1">
-                    <RetroButton
-                      onClick={handleLogoutAllOther}
-                      className="gap-1 text-[12px] text-win-red"
-                    >
-                      <LogOut className="h-3.5 w-3.5" aria-hidden />
-                      Log Out From All Other Devices
-                    </RetroButton>
-                  </div>
+                {!s.current && (
+                  <button
+                    type="button"
+                    onClick={() => handleKillSession(s.id)}
+                    className="px-3 py-1 rounded-full text-xs font-medium text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 self-end sm:self-center transition-colors"
+                  >
+                    Terminate Session
+                  </button>
                 )}
               </div>
-            </RetroGroupBox>
-
-            {/* Live Security Log & Audit Trail */}
-            <RetroGroupBox legend="Live Security Event Log & Audit Trail">
-              <div className="bevel-field retro-scroll overflow-x-auto bg-win-white">
-                <table className="w-full text-left text-[12px]">
-                  <thead className="bevel-out bg-win-face text-[11px] font-bold text-win-text">
-                    <tr>
-                      <th className="px-2 py-1.5">Timestamp</th>
-                      <th className="px-2 py-1.5">Event Type</th>
-                      <th className="px-2 py-1.5">Status</th>
-                      <th className="px-2 py-1.5">Details</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-win-face-light font-mono-sys">
-                    {logs.map((l, i) => (
-                      <tr key={i} className="hover:bg-win-title/10">
-                        <td className="px-2 py-1.5 text-win-shadow">{l.at}</td>
-                        <td className="px-2 py-1.5 font-bold text-win-title">{l.type}</td>
-                        <td className="px-2 py-1.5">
-                          <RetroBadge
-                            tone={
-                              l.status === 'SUCCESS'
-                                ? 'green'
-                                : l.status === 'BLOCKED'
-                                ? 'red'
-                                : 'blue'
-                            }
-                          >
-                            {l.status}
-                          </RetroBadge>
-                        </td>
-                        <td className="px-2 py-1.5 text-win-text">{l.detail}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </RetroGroupBox>
-
-            {/* Status bar */}
-            <RetroStatusBar
-              segments={[
-                <span key="sec" className="flex items-center gap-1 font-bold text-win-green">
-                  <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-                  FIREWALL & RLS ACTIVE
-                </span>,
-                <RetroBadge key="prot" tone="green">
-                  ALL SESSIONS GUARDED
-                </RetroBadge>,
-              ]}
-            />
+            ))}
           </div>
-        </RetroWindow>
+        </div>
+
+        {/* Live Security Log */}
+        <div className="p-6 rounded-3xl bg-[#12131d]/80 border border-white/10 backdrop-blur-2xl shadow-2xl flex flex-col gap-4">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <h3 className="text-sm font-bold text-white font-['var(--font-heading)']">
+              Audit Log &amp; Security Events
+            </h3>
+            <span className="text-xs font-mono text-zinc-500">{logs.length} AUDITED EVENTS</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-white/10 text-[11px] font-mono uppercase text-zinc-500">
+                  <th className="pb-3">Timestamp</th>
+                  <th className="pb-3">Event Type</th>
+                  <th className="pb-3">Status</th>
+                  <th className="pb-3">Details</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 font-mono">
+                {logs.map((l, i) => (
+                  <tr key={i} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3 text-zinc-500 text-[11px]">{l.at}</td>
+                    <td className="py-3 font-bold text-indigo-300">{l.type}</td>
+                    <td className="py-3">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          l.status === 'SUCCESS'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            : l.status === 'BLOCKED'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            : 'bg-white/10 text-zinc-300 border border-white/10'
+                        }`}
+                      >
+                        {l.status}
+                      </span>
+                    </td>
+                    <td className="py-3 text-zinc-300">{l.detail}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </DesktopShell>
+    </ModernShell>
   )
 }
