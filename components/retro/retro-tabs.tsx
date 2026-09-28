@@ -46,8 +46,8 @@ export function RetroTabs({
   const currentContent = activeIndex >= 0 ? tabs[activeIndex]?.content : null
 
   return (
-    <div className={className}>
-      <div role="tablist" className="relative z-10 flex flex-wrap gap-0.5 pl-1">
+    <div className={cn('flex flex-col gap-3', className)}>
+      <div role="tablist" className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#10111a] border border-white/10 overflow-x-auto scrollbar-none">
         {tabs.map((tab, i) => {
           const selected = getIsActive(tab, i)
           return (
@@ -58,8 +58,10 @@ export function RetroTabs({
               type="button"
               onClick={() => handleSelect(tab, i)}
               className={cn(
-                'bevel-out bg-win-face rounded-t px-2.5 py-1 text-[12px] font-bold dotted-focus select-none',
-                selected ? 'relative top-px pb-1.5 z-20 font-black text-win-text bg-win-face' : 'text-win-shadow hover:text-win-text',
+                'px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer',
+                selected
+                  ? 'bg-white text-zinc-950 shadow-md'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5',
               )}
             >
               {tab.label}
@@ -68,7 +70,9 @@ export function RetroTabs({
         })}
       </div>
       {currentContent ? (
-        <div className="bevel-out bg-win-face -mt-px p-3">{currentContent}</div>
+        <div className="rounded-2xl bg-[#10111a]/60 border border-white/10 p-4 sm:p-5 backdrop-blur-xl">
+          {currentContent}
+        </div>
       ) : null}
     </div>
   )
