@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import {
+  Home,
   Search,
   PackageSearch,
   MapPin,
@@ -23,6 +24,7 @@ export type NavItem = {
 }
 
 export const NAV_ITEMS: NavItem[] = [
+  { key: 'home', label: 'Home Page', href: '/', icon: Home },
   { key: 'dashboard', label: 'My Computer', href: '/dashboard', icon: LayoutGrid },
   { key: 'search', label: 'Search DB', href: '/search', icon: Search },
   { key: 'lost', label: 'Report Lost', href: '/lost', icon: FilePlus2 },

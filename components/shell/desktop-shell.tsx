@@ -12,27 +12,22 @@ export function DesktopShell({
   children: ReactNode
 }) {
   return (
-    <div
-      className="min-h-dvh bg-win-desktop"
-      style={{
-        backgroundImage:
-          'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)',
-        backgroundSize: '4px 4px',
-      }}
-    >
+    <div className="min-h-dvh bg-win-desktop">
       <div className="mx-auto flex max-w-6xl gap-3 px-3 pb-16 pt-3">
         {/* Sidebar nav — desktop/tablet */}
         <nav className="hidden w-52 shrink-0 md:block" aria-label="Primary">
           <div className="bevel-out bg-win-face sticky top-3" style={{ padding: 3 }}>
-            <div
-              className="flex items-center gap-2 px-2 py-1 text-win-title-text"
+            <Link
+              href="/"
+              title="Return to Desktop Home"
+              className="flex items-center gap-2 px-2 py-1 text-win-title-text hover:brightness-110 dotted-focus"
               style={{
                 background:
                   'linear-gradient(90deg, var(--color-win-title) 0%, var(--color-win-title-2) 100%)',
               }}
             >
               <span className="font-pixel text-[10px]">LOST//98</span>
-            </div>
+            </Link>
             <ul className="p-1">
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon

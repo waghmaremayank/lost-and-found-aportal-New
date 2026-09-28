@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Lock, Power, Search, Bell } from 'lucide-react'
+import { Lock, Power, Search, Bell, Home } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NAV_ITEMS } from './nav-config'
 import { RetroClock } from './retro-clock'
@@ -84,6 +84,18 @@ export function RetroTaskbar({ activeKey }: { activeKey?: string }) {
         </span>
         Start
       </button>
+
+      <Link
+        href="/"
+        aria-label="Home"
+        className={cn(
+          'bevel-out flex h-8 items-center gap-1.5 bg-win-face px-2 text-[13px] active:bevel-in dotted-focus',
+          activeKey === 'home' || activeKey === undefined ? 'font-bold' : ''
+        )}
+      >
+        <Home className="h-4 w-4" aria-hidden />
+        Home
+      </Link>
 
       <Link
         href="/search"

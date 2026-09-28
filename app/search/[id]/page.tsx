@@ -9,6 +9,7 @@ import {
   User,
   ShieldCheck,
   Sparkles,
+  Camera,
 } from 'lucide-react'
 import { DesktopShell } from '@/components/shell/desktop-shell'
 import {
@@ -62,8 +63,24 @@ export default async function ItemDetailPage({
                 <span className="font-mono-sys ml-auto text-[12px] text-win-shadow">#{item.id}</span>
               </div>
 
-              <div className="bevel-in bg-win-white grid h-44 place-items-center">
-                <span className="font-pixel text-sm text-win-shadow">[ IMAGE WITHHELD ]</span>
+              {/* Photo Preview Container */}
+              <div className="bevel-in bg-win-dark relative overflow-hidden rounded-none h-64 flex items-center justify-center">
+                {item.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="h-full w-full object-cover object-center"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-win-face">
+                    <Camera className="h-10 w-10 text-win-shadow" aria-hidden />
+                    <span className="font-pixel text-sm">[ IMAGE WITHHELD ]</span>
+                  </div>
+                )}
+                <div className="absolute top-2 left-2 bevel-out bg-win-face/90 px-2 py-1 text-[11px] font-bold text-win-title backdrop-blur-sm">
+                  {item.type === 'LOST' ? 'LOST PROPERTY PHOTO' : 'FOUND EVIDENCE PHOTO'}
+                </div>
               </div>
 
               {item.matchConfidence ? (
@@ -88,8 +105,7 @@ export default async function ItemDetailPage({
               <RetroGroupBox legend="Description">
                 <p className="text-[13px] leading-relaxed text-win-text">{item.description}</p>
                 <p className="mt-2 text-[11px] text-win-shadow">
-                  Note: sensitive identifying details are hidden and confirmed only during verified
-                  ownership claims.
+                  Note: sensitive identifying details (serial numbers, interior contents) are hidden and confirmed only during verified ownership claims.
                 </p>
               </RetroGroupBox>
 
@@ -101,7 +117,7 @@ export default async function ItemDetailPage({
                   </span>,
                   <span key="sec" className="flex items-center gap-1">
                     <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-                    Protected
+                    Protected by LOST//98 System
                   </span>,
                 ]}
               />
@@ -113,7 +129,7 @@ export default async function ItemDetailPage({
 
         {related.length > 0 ? (
           <RetroWindow
-            title="Related Reports"
+            title="Related Reports in this Category"
             icon={<Sparkles className="h-3.5 w-3.5" aria-hidden />}
             controls={['minimize', 'close']}
           >

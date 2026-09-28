@@ -42,7 +42,7 @@ export function RetroDialog({
       }}
     >
       <div className={cn('bevel-out bg-win-face w-full max-w-md', className)} style={{ padding: 3 }}>
-        <RetroTitleBar title={title} icon={icon} controls={['close']} />
+        <RetroTitleBar title={title} icon={icon} controls={['close']} onClose={onClose} />
         <div className="p-4">{children}</div>
       </div>
     </div>
